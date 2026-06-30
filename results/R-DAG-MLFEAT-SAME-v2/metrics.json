@@ -1,0 +1,628 @@
+{
+  "run_id": "R-DAG-MLFEAT-SAME",
+  "version": "v1",
+  "milestone": "No-ML same-corpus comparison (PCA proxy)",
+  "gate": "G3",
+  "timestamp": "2026-06-29T11:15:38",
+  "status": "COMPLETED",
+  "verdict": "NON-INFERIOR (STABLE)",
+  "n_runs": 5,
+  "all_non_inferior": true,
+  "delta_mean": -0.0122,
+  "delta_std": 0.0002,
+  "stable": true,
+  "run_results": [
+    {
+      "run": 1,
+      "seed": 42,
+      "malphpylo_cf_rate": 0.4554,
+      "pca_ml_cf_rate": 0.4674,
+      "delta": -0.0121,
+      "non_inferior": true,
+      "verdict": "NON-INFERIOR",
+      "stats_mp": {
+        "cf_edges": 30221,
+        "same_edges": 36147,
+        "total": 66368,
+        "per_family": {
+          "AgentTesla": {
+            "cf": 4647,
+            "same": 6201
+          },
+          "NjRAT": {
+            "cf": 2279,
+            "same": 1561
+          },
+          "Formbook": {
+            "cf": 4550,
+            "same": 8698
+          },
+          "PrivateLoader": {
+            "cf": 2985,
+            "same": 855
+          },
+          "AsyncRAT": {
+            "cf": 3158,
+            "same": 4714
+          },
+          "RedLineStealer": {
+            "cf": 3092,
+            "same": 748
+          },
+          "RaccoonStealer": {
+            "cf": 781,
+            "same": 3027
+          },
+          "PlugX": {
+            "cf": 1881,
+            "same": 1927
+          },
+          "IcedID": {
+            "cf": 1953,
+            "same": 1887
+          },
+          "CobaltStrike": {
+            "cf": 2477,
+            "same": 1363
+          },
+          "NanoCore": {
+            "cf": 283,
+            "same": 3493
+          },
+          "Amadey": {
+            "cf": 2135,
+            "same": 1673
+          }
+        }
+      },
+      "stats_pca": {
+        "cf_edges": 31021,
+        "same_edges": 35347,
+        "total": 66368,
+        "per_family": {
+          "AgentTesla": {
+            "cf": 5008,
+            "same": 5840
+          },
+          "NjRAT": {
+            "cf": 2272,
+            "same": 1568
+          },
+          "Formbook": {
+            "cf": 5004,
+            "same": 8244
+          },
+          "PrivateLoader": {
+            "cf": 2881,
+            "same": 959
+          },
+          "AsyncRAT": {
+            "cf": 3260,
+            "same": 4612
+          },
+          "RedLineStealer": {
+            "cf": 3116,
+            "same": 724
+          },
+          "RaccoonStealer": {
+            "cf": 769,
+            "same": 3039
+          },
+          "PlugX": {
+            "cf": 1768,
+            "same": 2040
+          },
+          "IcedID": {
+            "cf": 1957,
+            "same": 1883
+          },
+          "CobaltStrike": {
+            "cf": 2476,
+            "same": 1364
+          },
+          "NanoCore": {
+            "cf": 283,
+            "same": 3493
+          },
+          "Amadey": {
+            "cf": 2227,
+            "same": 1581
+          }
+        }
+      },
+      "pca_components": 50,
+      "pca_explained_variance": 0.5067
+    },
+    {
+      "run": 2,
+      "seed": 43,
+      "malphpylo_cf_rate": 0.4554,
+      "pca_ml_cf_rate": 0.4673,
+      "delta": -0.012,
+      "non_inferior": true,
+      "verdict": "NON-INFERIOR",
+      "stats_mp": {
+        "cf_edges": 30221,
+        "same_edges": 36147,
+        "total": 66368,
+        "per_family": {
+          "AgentTesla": {
+            "cf": 4647,
+            "same": 6201
+          },
+          "NjRAT": {
+            "cf": 2279,
+            "same": 1561
+          },
+          "Formbook": {
+            "cf": 4550,
+            "same": 8698
+          },
+          "PrivateLoader": {
+            "cf": 2985,
+            "same": 855
+          },
+          "AsyncRAT": {
+            "cf": 3158,
+            "same": 4714
+          },
+          "RedLineStealer": {
+            "cf": 3092,
+            "same": 748
+          },
+          "RaccoonStealer": {
+            "cf": 781,
+            "same": 3027
+          },
+          "PlugX": {
+            "cf": 1881,
+            "same": 1927
+          },
+          "IcedID": {
+            "cf": 1953,
+            "same": 1887
+          },
+          "CobaltStrike": {
+            "cf": 2477,
+            "same": 1363
+          },
+          "NanoCore": {
+            "cf": 283,
+            "same": 3493
+          },
+          "Amadey": {
+            "cf": 2135,
+            "same": 1673
+          }
+        }
+      },
+      "stats_pca": {
+        "cf_edges": 31015,
+        "same_edges": 35353,
+        "total": 66368,
+        "per_family": {
+          "AgentTesla": {
+            "cf": 4985,
+            "same": 5863
+          },
+          "NjRAT": {
+            "cf": 2263,
+            "same": 1577
+          },
+          "Formbook": {
+            "cf": 4983,
+            "same": 8265
+          },
+          "PrivateLoader": {
+            "cf": 2921,
+            "same": 919
+          },
+          "AsyncRAT": {
+            "cf": 3279,
+            "same": 4593
+          },
+          "RedLineStealer": {
+            "cf": 3112,
+            "same": 728
+          },
+          "RaccoonStealer": {
+            "cf": 778,
+            "same": 3030
+          },
+          "PlugX": {
+            "cf": 1782,
+            "same": 2026
+          },
+          "IcedID": {
+            "cf": 1941,
+            "same": 1899
+          },
+          "CobaltStrike": {
+            "cf": 2479,
+            "same": 1361
+          },
+          "NanoCore": {
+            "cf": 283,
+            "same": 3493
+          },
+          "Amadey": {
+            "cf": 2209,
+            "same": 1599
+          }
+        }
+      },
+      "pca_components": 50,
+      "pca_explained_variance": 0.5067
+    },
+    {
+      "run": 3,
+      "seed": 44,
+      "malphpylo_cf_rate": 0.4554,
+      "pca_ml_cf_rate": 0.4677,
+      "delta": -0.0123,
+      "non_inferior": true,
+      "verdict": "NON-INFERIOR",
+      "stats_mp": {
+        "cf_edges": 30221,
+        "same_edges": 36147,
+        "total": 66368,
+        "per_family": {
+          "AgentTesla": {
+            "cf": 4647,
+            "same": 6201
+          },
+          "NjRAT": {
+            "cf": 2279,
+            "same": 1561
+          },
+          "Formbook": {
+            "cf": 4550,
+            "same": 8698
+          },
+          "PrivateLoader": {
+            "cf": 2985,
+            "same": 855
+          },
+          "AsyncRAT": {
+            "cf": 3158,
+            "same": 4714
+          },
+          "RedLineStealer": {
+            "cf": 3092,
+            "same": 748
+          },
+          "RaccoonStealer": {
+            "cf": 781,
+            "same": 3027
+          },
+          "PlugX": {
+            "cf": 1881,
+            "same": 1927
+          },
+          "IcedID": {
+            "cf": 1953,
+            "same": 1887
+          },
+          "CobaltStrike": {
+            "cf": 2477,
+            "same": 1363
+          },
+          "NanoCore": {
+            "cf": 283,
+            "same": 3493
+          },
+          "Amadey": {
+            "cf": 2135,
+            "same": 1673
+          }
+        }
+      },
+      "stats_pca": {
+        "cf_edges": 31037,
+        "same_edges": 35331,
+        "total": 66368,
+        "per_family": {
+          "AgentTesla": {
+            "cf": 4982,
+            "same": 5866
+          },
+          "NjRAT": {
+            "cf": 2281,
+            "same": 1559
+          },
+          "Formbook": {
+            "cf": 5045,
+            "same": 8203
+          },
+          "PrivateLoader": {
+            "cf": 2898,
+            "same": 942
+          },
+          "AsyncRAT": {
+            "cf": 3254,
+            "same": 4618
+          },
+          "RedLineStealer": {
+            "cf": 3126,
+            "same": 714
+          },
+          "RaccoonStealer": {
+            "cf": 774,
+            "same": 3034
+          },
+          "PlugX": {
+            "cf": 1736,
+            "same": 2072
+          },
+          "IcedID": {
+            "cf": 1963,
+            "same": 1877
+          },
+          "CobaltStrike": {
+            "cf": 2472,
+            "same": 1368
+          },
+          "NanoCore": {
+            "cf": 283,
+            "same": 3493
+          },
+          "Amadey": {
+            "cf": 2223,
+            "same": 1585
+          }
+        }
+      },
+      "pca_components": 50,
+      "pca_explained_variance": 0.5067
+    },
+    {
+      "run": 4,
+      "seed": 45,
+      "malphpylo_cf_rate": 0.4554,
+      "pca_ml_cf_rate": 0.4675,
+      "delta": -0.0121,
+      "non_inferior": true,
+      "verdict": "NON-INFERIOR",
+      "stats_mp": {
+        "cf_edges": 30221,
+        "same_edges": 36147,
+        "total": 66368,
+        "per_family": {
+          "AgentTesla": {
+            "cf": 4647,
+            "same": 6201
+          },
+          "NjRAT": {
+            "cf": 2279,
+            "same": 1561
+          },
+          "Formbook": {
+            "cf": 4550,
+            "same": 8698
+          },
+          "PrivateLoader": {
+            "cf": 2985,
+            "same": 855
+          },
+          "AsyncRAT": {
+            "cf": 3158,
+            "same": 4714
+          },
+          "RedLineStealer": {
+            "cf": 3092,
+            "same": 748
+          },
+          "RaccoonStealer": {
+            "cf": 781,
+            "same": 3027
+          },
+          "PlugX": {
+            "cf": 1881,
+            "same": 1927
+          },
+          "IcedID": {
+            "cf": 1953,
+            "same": 1887
+          },
+          "CobaltStrike": {
+            "cf": 2477,
+            "same": 1363
+          },
+          "NanoCore": {
+            "cf": 283,
+            "same": 3493
+          },
+          "Amadey": {
+            "cf": 2135,
+            "same": 1673
+          }
+        }
+      },
+      "stats_pca": {
+        "cf_edges": 31024,
+        "same_edges": 35344,
+        "total": 66368,
+        "per_family": {
+          "AgentTesla": {
+            "cf": 4998,
+            "same": 5850
+          },
+          "NjRAT": {
+            "cf": 2267,
+            "same": 1573
+          },
+          "Formbook": {
+            "cf": 4969,
+            "same": 8279
+          },
+          "PrivateLoader": {
+            "cf": 2916,
+            "same": 924
+          },
+          "AsyncRAT": {
+            "cf": 3249,
+            "same": 4623
+          },
+          "RedLineStealer": {
+            "cf": 3108,
+            "same": 732
+          },
+          "RaccoonStealer": {
+            "cf": 776,
+            "same": 3032
+          },
+          "PlugX": {
+            "cf": 1814,
+            "same": 1994
+          },
+          "IcedID": {
+            "cf": 1934,
+            "same": 1906
+          },
+          "CobaltStrike": {
+            "cf": 2463,
+            "same": 1377
+          },
+          "NanoCore": {
+            "cf": 283,
+            "same": 3493
+          },
+          "Amadey": {
+            "cf": 2247,
+            "same": 1561
+          }
+        }
+      },
+      "pca_components": 50,
+      "pca_explained_variance": 0.5067
+    },
+    {
+      "run": 5,
+      "seed": 46,
+      "malphpylo_cf_rate": 0.4554,
+      "pca_ml_cf_rate": 0.4679,
+      "delta": -0.0125,
+      "non_inferior": true,
+      "verdict": "NON-INFERIOR",
+      "stats_mp": {
+        "cf_edges": 30221,
+        "same_edges": 36147,
+        "total": 66368,
+        "per_family": {
+          "AgentTesla": {
+            "cf": 4647,
+            "same": 6201
+          },
+          "NjRAT": {
+            "cf": 2279,
+            "same": 1561
+          },
+          "Formbook": {
+            "cf": 4550,
+            "same": 8698
+          },
+          "PrivateLoader": {
+            "cf": 2985,
+            "same": 855
+          },
+          "AsyncRAT": {
+            "cf": 3158,
+            "same": 4714
+          },
+          "RedLineStealer": {
+            "cf": 3092,
+            "same": 748
+          },
+          "RaccoonStealer": {
+            "cf": 781,
+            "same": 3027
+          },
+          "PlugX": {
+            "cf": 1881,
+            "same": 1927
+          },
+          "IcedID": {
+            "cf": 1953,
+            "same": 1887
+          },
+          "CobaltStrike": {
+            "cf": 2477,
+            "same": 1363
+          },
+          "NanoCore": {
+            "cf": 283,
+            "same": 3493
+          },
+          "Amadey": {
+            "cf": 2135,
+            "same": 1673
+          }
+        }
+      },
+      "stats_pca": {
+        "cf_edges": 31053,
+        "same_edges": 35315,
+        "total": 66368,
+        "per_family": {
+          "AgentTesla": {
+            "cf": 4999,
+            "same": 5849
+          },
+          "NjRAT": {
+            "cf": 2266,
+            "same": 1574
+          },
+          "Formbook": {
+            "cf": 5012,
+            "same": 8236
+          },
+          "PrivateLoader": {
+            "cf": 2907,
+            "same": 933
+          },
+          "AsyncRAT": {
+            "cf": 3261,
+            "same": 4611
+          },
+          "RedLineStealer": {
+            "cf": 3116,
+            "same": 724
+          },
+          "RaccoonStealer": {
+            "cf": 781,
+            "same": 3027
+          },
+          "PlugX": {
+            "cf": 1767,
+            "same": 2041
+          },
+          "IcedID": {
+            "cf": 1971,
+            "same": 1869
+          },
+          "CobaltStrike": {
+            "cf": 2480,
+            "same": 1360
+          },
+          "NanoCore": {
+            "cf": 283,
+            "same": 3493
+          },
+          "Amadey": {
+            "cf": 2210,
+            "same": 1598
+          }
+        }
+      },
+      "pca_components": 50,
+      "pca_explained_variance": 0.5067
+    }
+  ],
+  "thresholds": {
+    "delta_eq": 0.1
+  },
+  "evaluation_type": "SAME-CORPUS (R-G1, PCA proxy for ML embedding)",
+  "n_samples": 2074,
+  "k_neighbors": 32,
+  "timing_seconds": 2.7
+}

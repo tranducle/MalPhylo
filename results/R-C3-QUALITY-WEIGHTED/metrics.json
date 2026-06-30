@@ -1,0 +1,142 @@
+{
+  "run_id": "R-C3-QUALITY-WEIGHTED",
+  "gate": "G4",
+  "milestone": "C3 quality-weighted fusion validation (REAL data)",
+  "timestamp": "2026-06-29T12:07:10",
+  "status": "COMPLETED",
+  "results": {
+    "uniform": {
+      "weights": {
+        "pe_timestamp": 1.0,
+        "first_seen": 1.0,
+        "string_markers": 1.0,
+        "code_reuse_order": 1.0
+      },
+      "n_valid": 3002,
+      "inconsistency_mean": 0.3914,
+      "inconsistency_std": 0.0042,
+      "per_seed": [
+        0.3898,
+        0.3878,
+        0.3944,
+        0.3868,
+        0.398
+      ]
+    },
+    "quality_3:1:1:0.5": {
+      "weights": {
+        "pe_timestamp": 1.0,
+        "first_seen": 0.5,
+        "string_markers": 3.0,
+        "code_reuse_order": 1.0
+      },
+      "n_valid": 3002,
+      "inconsistency_mean": 0.3549,
+      "inconsistency_std": 0.0063,
+      "per_seed": [
+        0.3446,
+        0.3514,
+        0.3606,
+        0.3562,
+        0.3618
+      ]
+    },
+    "aggressive_5:0.5:1:0.2": {
+      "weights": {
+        "pe_timestamp": 0.5,
+        "first_seen": 0.2,
+        "string_markers": 5.0,
+        "code_reuse_order": 1.0
+      },
+      "n_valid": 3002,
+      "inconsistency_mean": 0.3553,
+      "inconsistency_std": 0.0063,
+      "per_seed": [
+        0.3452,
+        0.352,
+        0.3614,
+        0.3558,
+        0.3622
+      ]
+    },
+    "near_pure_string_10:0.1:0.5:0": {
+      "weights": {
+        "pe_timestamp": 0.1,
+        "first_seen": 0.0,
+        "string_markers": 10.0,
+        "code_reuse_order": 0.5
+      },
+      "n_valid": 2241,
+      "inconsistency_mean": 0.3043,
+      "inconsistency_std": 0.0053,
+      "per_seed": [
+        0.2996,
+        0.308,
+        0.3026,
+        0.2986,
+        0.3126
+      ]
+    },
+    "string_only": {
+      "weights": {
+        "pe_timestamp": 0.0,
+        "first_seen": 0.0,
+        "string_markers": 1.0,
+        "code_reuse_order": 0.0
+      },
+      "n_valid": 1036,
+      "inconsistency_mean": 0.2101,
+      "inconsistency_std": 0.0029,
+      "per_seed": [
+        0.215,
+        0.2104,
+        0.209,
+        0.206,
+        0.21
+      ]
+    },
+    "balanced_4:1:2:0.3": {
+      "weights": {
+        "pe_timestamp": 1.0,
+        "first_seen": 0.3,
+        "string_markers": 4.0,
+        "code_reuse_order": 2.0
+      },
+      "n_valid": 3002,
+      "inconsistency_mean": 0.3553,
+      "inconsistency_std": 0.0063,
+      "per_seed": [
+        0.3452,
+        0.352,
+        0.3614,
+        0.3558,
+        0.3622
+      ]
+    },
+    "single_pe_timestamp": {
+      "n_valid": 1880,
+      "inconsistency_mean": 0.3721,
+      "inconsistency_std": 0.0056
+    },
+    "single_first_seen": {
+      "n_valid": 3002,
+      "inconsistency_mean": 0.4315,
+      "inconsistency_std": 0.0041
+    },
+    "single_string_markers": {
+      "n_valid": 1036,
+      "inconsistency_mean": 0.2101,
+      "inconsistency_std": 0.0029
+    },
+    "single_code_reuse_order": {
+      "n_valid": 1161,
+      "inconsistency_mean": 0.3747,
+      "inconsistency_std": 0.0083
+    }
+  },
+  "best_config": "string_only",
+  "best_inconsistency": 0.2101,
+  "beats_uniform": true,
+  "beats_best_single": true,
+  "timing_seconds": 4.1
+}

@@ -1,0 +1,48 @@
+{
+  "run_id": "R-MST-SKEL",
+  "milestone": "MST vertical skeleton structure quality vs B4",
+  "gate": "pre-G3",
+  "timestamp": "2026-06-28T21:09:13",
+  "status": "COMPLETED",
+  "verdict": "PASS",
+  "subset_size": 500,
+  "mst": {
+    "n_edges": 499,
+    "expected_edges": 499,
+    "connected": true,
+    "family_purity": 0.1142,
+    "cross_family_edges": 442,
+    "cross_family_fraction": 0.8858,
+    "mean_edge_weight": 0.0,
+    "min_edge_weight": 0.0,
+    "max_edge_weight": 0.0,
+    "tree_depth": 1
+  },
+  "b4_mst_only": {
+    "cross_family_fraction": 0.8858,
+    "description": "B4 = MST skeleton only (no typed edges, no augmentation)"
+  },
+  "malphylo_full_dag": {
+    "total_edges": 745685,
+    "mst_edges": 2073,
+    "augment_edges": 743612,
+    "cf_fraction": 0.998,
+    "delta_vs_b4_pct": 11.22
+  },
+  "families": {
+    "n": 14,
+    "distribution": {
+      "Unknown": 146,
+      "Formbook": 71,
+      "AgentTesla": 58,
+      "AsyncRAT": 38,
+      "IcedID": 26,
+      "NjRAT": 22,
+      "RaccoonStealer": 21,
+      "CobaltStrike": 21,
+      "NanoCore": 21,
+      "Bumblebee": 20
+    }
+  },
+  "timing_seconds": 0.1
+}

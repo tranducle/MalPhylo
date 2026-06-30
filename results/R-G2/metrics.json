@@ -1,0 +1,95 @@
+{
+  "run_id": "R-G2",
+  "gate": "G2",
+  "milestone": "baseline sanity reproduction",
+  "timestamp": "2026-06-28T17:04:30",
+  "status": "COMPLETED",
+  "verdict": "PASS",
+  "subset_size": 5000,
+  "seed": 20260628,
+  "distance": "cosine",
+  "baselines": {
+    "B1_NJ_reference": {
+      "run_id": "R-SMOKE-2",
+      "verdict": "COMPLETED",
+      "cherry_purity": 0.8066,
+      "n_branches": 9998,
+      "seconds": 1189.71,
+      "note": "B1 NJ sanity = R-SMOKE-2 (5K PASS). Full 102K NJ deferred (~137hrs)."
+    },
+    "B2_UPGMA": {
+      "method": "UPGMA_average_linkage",
+      "n_leaves": 5000,
+      "n_merges": 4999,
+      "cophenetic_correlation": 0.927298,
+      "max_cophenetic_dist": 0.994684,
+      "cherry_purity": {
+        "n_cherries_with_labels": 1521,
+        "n_same_family": 1336,
+        "cherry_purity": 0.8784
+      },
+      "seconds": 0.6
+    },
+    "B6_NeighborNet_MedianJoining": {
+      "method": "median_joining_approximation",
+      "n_nodes": 5100,
+      "n_leaf_nodes": 5000,
+      "n_median_nodes": 100,
+      "n_edges": 12273039,
+      "n_components": 1,
+      "n_mst_edges": 4999,
+      "n_proximity_edges": 12267740,
+      "n_median_edges": 300,
+      "cross_family_edges": 11431363,
+      "same_family_edges": 841376,
+      "cross_family_fraction": 0.9314,
+      "mean_degree": 4812.9565,
+      "max_degree": 5099,
+      "mst_max_weight": 0.803974,
+      "proximity_threshold": 1.205962,
+      "note": "Simplified median-joining approximation (Python). For publication-quality NeighborNet, import the NEXUS file in SplitsTree4.",
+      "nexus_file": "runs/R-G2/b6_nexus.nex",
+      "nexus_size_kb": 134978,
+      "seconds": 85.21
+    },
+    "B7_kNN_graph": {
+      "method": "kNN_graph",
+      "k": 10,
+      "n_nodes": 5000,
+      "n_edges": 35544,
+      "n_components": 10,
+      "cross_family_edges": 10128,
+      "same_family_edges": 25416,
+      "cross_family_fraction": 0.2849,
+      "mean_degree": 14.2176,
+      "max_degree": 35,
+      "mean_edge_weight": 0.026525,
+      "note": "Plain kNN graph (no MST skeleton, no edge typing) = baseline B7.",
+      "seconds": 0.99
+    }
+  },
+  "timing": {
+    "total_seconds": 120.67
+  },
+  "data_meta": {
+    "n_total": 102322,
+    "dim": 1000,
+    "n_labeled": 101046,
+    "load_seconds": 32.02
+  },
+  "artifacts": {
+    "b2_upgma_tree": "runs/R-G2/b2_upgma_tree.newick",
+    "b6_nexus": "runs/R-G2/b6_nexus.nex",
+    "b6_median_joining": "runs/R-G2/b6_median_joining.gml",
+    "b7_knn_graph": "runs/R-G2/b7_knn_graph.gexf"
+  },
+  "g2_checks": {
+    "B2_cherry_purity_gt_random": true,
+    "B2_non_degenerate": true,
+    "B6_network_built": true,
+    "B6_cross_family_edges": true,
+    "B7_graph_built": true,
+    "B7_cross_family_edges": true
+  },
+  "note": "G2 baseline sanity: B1 (NJ, from R-SMOKE-2) + B2 (UPGMA) + B6 (NeighborNet NEXUS + median-joining approx) + B7 (kNN graph). B6 NeighborNet proper requires SplitsTree4 GUI on the generated NEXUS file; median-joining approximation is the Python-tractable proxy."
+}

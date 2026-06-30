@@ -1,0 +1,40 @@
+# Secrets — NEVER commit
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+*.egg-info/
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+
+# Data — download on demand, never vendored (keep docs only)
+data/malwarebazaar/samples/
+data/malwarebazaar/*.jsonl
+data/maltree/*.json
+data/maltree/*.json.*
+data/mascot-meta/
+!data/README.md
+
+# Large run outputs — keep only metrics.json + run.log (already in results/)
+results/**/*.npy
+results/**/*.jsonl
+results/**/*.graphml
+results/**/*.gexf
+results/**/*.gml
+results/**/*.newick
+results/**/*.nex
+results/**/*.csv
+results/**/*.svg
+results/**/dag.*
+results/**/b*.gexf
+results/**/b*.newick
+results/**/tree.*
+results/**/scatter_*

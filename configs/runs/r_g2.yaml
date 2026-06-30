@@ -1,0 +1,18 @@
+# R-G2 — Baseline sanity reproduction (B2 UPGMA, B6 NeighborNet+MedianJoining, B7 kNN).
+# Gate G2. NO ML TRAINING. Same 5K subset + seed as R-SMOKE-2 for direct comparability with B1 NJ.
+run_id: R-G2
+output_dir: runs
+
+# Data (same as R-SMOKE-2)
+embeddings_path: data/maltree/embeddings_fused.json
+dim_expect: null
+
+# Subsample (identical to R-SMOKE-2 for B1↔B2 comparability)
+subset_size: 5000
+seed: 20260628
+
+# B6 median-joining approximation
+b6_max_medians: 100
+
+# B7 kNN graph
+b7_k: 10

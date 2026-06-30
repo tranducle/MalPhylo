@@ -1,0 +1,180 @@
+{
+  "run_id": "R-CROSSFAM-HONEST",
+  "gate": "G3",
+  "milestone": "C1 density-matched honest re-evaluation (D1 fix)",
+  "timestamp": "2026-06-29T11:27:10",
+  "status": "COMPLETED",
+  "corpus": {
+    "n_samples": 2074,
+    "n_families": 12,
+    "families": {
+      "AgentTesla": 339,
+      "NjRAT": 120,
+      "Formbook": 414,
+      "PrivateLoader": 120,
+      "AsyncRAT": 246,
+      "RedLineStealer": 120,
+      "RaccoonStealer": 119,
+      "PlugX": 119,
+      "IcedID": 120,
+      "CobaltStrike": 120,
+      "NanoCore": 118,
+      "Amadey": 119
+    }
+  },
+  "metric_definition": {
+    "name": "density_matched_cf_fraction",
+    "budget": 15246,
+    "budget_basis": "B6 untyped-network edge count (densest baseline)",
+    "fpr_control": "methodology \u00a74.2 N_null (intra-family pairs w/o code-reuse)",
+    "fpr_alpha": 0.05,
+    "rationale": "Original R-CROSSFAM cf_fraction was a density artefact (745,685 vs 4,146 edges). This metric compares every method at the SAME edge budget, removing the confound."
+  },
+  "theta_optimization": {
+    "grid": [
+      0.6,
+      0.65,
+      0.7,
+      0.72,
+      0.74,
+      0.76,
+      0.78,
+      0.8,
+      0.82,
+      0.84,
+      0.86,
+      0.88,
+      0.9,
+      0.92,
+      0.94,
+      0.96
+    ],
+    "patience": 5,
+    "objective": "mean_similarity_of_admitted_augment_edges at sparse density (<=5n)",
+    "stopped_early": true,
+    "final_non_improve_streak": 5,
+    "best_theta_min": 0.6,
+    "best_total_edges": 10370,
+    "best_graph_density": 0.004824,
+    "best_mean_sim_augment": 0.997109,
+    "trace_summary": [
+      {
+        "theta": 0.6,
+        "edges": 10370,
+        "density": 0.004824,
+        "mean_sim": 0.997109,
+        "sparse": true,
+        "best": true
+      },
+      {
+        "theta": 0.65,
+        "edges": 10370,
+        "density": 0.004824,
+        "mean_sim": 0.997109,
+        "sparse": true,
+        "best": false
+      },
+      {
+        "theta": 0.7,
+        "edges": 10370,
+        "density": 0.004824,
+        "mean_sim": 0.997109,
+        "sparse": true,
+        "best": false
+      },
+      {
+        "theta": 0.72,
+        "edges": 10370,
+        "density": 0.004824,
+        "mean_sim": 0.997109,
+        "sparse": true,
+        "best": false
+      },
+      {
+        "theta": 0.74,
+        "edges": 10370,
+        "density": 0.004824,
+        "mean_sim": 0.997109,
+        "sparse": true,
+        "best": false
+      },
+      {
+        "theta": 0.76,
+        "edges": 10370,
+        "density": 0.004824,
+        "mean_sim": 0.997109,
+        "sparse": true,
+        "best": false
+      }
+    ]
+  },
+  "density_matched_results": {
+    "matched_sparse_budget": 10370,
+    "malphpylo_cf_fraction": 0.860559,
+    "malphpylo_mst_edges": 2073,
+    "malphpylo_augment_edges_kept": 8297,
+    "b6_untyped_cf_fraction": 0.220347,
+    "delta_cf_vs_b6": 0.640212,
+    "claim_basis": "typed-reticulation capacity (C2-validated typing), NOT cf-fraction superiority",
+    "interpretation": "At the matched sparse budget, MalPhylo's real DAG concentrates a HIGHER cross-family fraction (0.861) than the untyped network (0.220); \u0394=+0.640. We nevertheless do NOT rest the C1 claim on this margin: with no ground-truth cross-family link set, a higher cf_fraction is not by itself proof of correct recovery. The defensible C1 contribution is the TYPED semantics on the augment edges (validated by C2), which an untyped network cannot provide and a tree cannot structurally express."
+  },
+  "similarity_diagnostic": {
+    "n_cross_family_pairs_total": 1913118,
+    "mean_cf_similarity": 0.509409,
+    "median_cf_similarity": 0.487562,
+    "frac_cf_pairs_above_0.9": 0.062051,
+    "construct_validity_note": "If mean cross-family similarity is very high (>0.9), much of the measured similarity may reflect shared packer/compiler environment rather than genuine code relatedness; this is reported as a limitation and mitigated by the trust-renormalization of packed sections (methodology \u00a73.2).",
+    "theta_discrimination": [
+      {
+        "theta": 0.3,
+        "n_cf_pairs_above": 1652925,
+        "cap_binds": true
+      },
+      {
+        "theta": 0.4,
+        "n_cf_pairs_above": 1247859,
+        "cap_binds": true
+      },
+      {
+        "theta": 0.5,
+        "n_cf_pairs_above": 912744,
+        "cap_binds": true
+      },
+      {
+        "theta": 0.6,
+        "n_cf_pairs_above": 567193,
+        "cap_binds": true
+      },
+      {
+        "theta": 0.7,
+        "n_cf_pairs_above": 242282,
+        "cap_binds": true
+      },
+      {
+        "theta": 0.8,
+        "n_cf_pairs_above": 208209,
+        "cap_binds": true
+      },
+      {
+        "theta": 0.9,
+        "n_cf_pairs_above": 118711,
+        "cap_binds": true
+      },
+      {
+        "theta": 0.95,
+        "n_cf_pairs_above": 91945,
+        "cap_binds": true
+      },
+      {
+        "theta": 0.99,
+        "n_cf_pairs_above": 41003,
+        "cap_binds": true
+      }
+    ]
+  },
+  "theta_sweep_note": "The theta grid [0.60..0.96] yields an identical operating point at every theta because the sparsity cap (5n edges) binds before the theta filter: there are >=5n cross-family pairs above even theta=0.96. Theta therefore does not discriminate in this range; the reported theta=0.60 is the first (least-strict) grid point at which a valid sparse typed DAG exists, NOT a converged optimum. This is reported transparently rather than framed as an optimization result.",
+  "honest_verdict": "PASS",
+  "honest_verdict_reason": "Sparse phylogeny-like operating point exists (<=5n edges) with non-degenerate typed augmentation (>=1 per sample) at mean similarity >=0.5. C1 is claimed as typed-reticulation CAPACITY (structural), NOT recovery superiority.",
+  "reconciliation_note": "This run REPLACES the cf_fraction comparison in R-CROSSFAM/R-MAIN-Win for the C1 claim. The original R-CROSSFAM cf_fraction=0.998 is retained only as a structural-representation-capacity diagnostic, NOT as the C1 success metric (per CONTRADICTIONS_REPORT D1).",
+  "timing_seconds": 82.49
+}

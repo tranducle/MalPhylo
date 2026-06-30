@@ -1,0 +1,115 @@
+{
+  "run_id": "R-ABLATE-K-A9",
+  "milestone": "G4 ablations: k-sensitivity (A8) + temporal LOO (A9) [FIXED]",
+  "gate": "G4",
+  "timestamp": "2026-06-28T21:39:22",
+  "status": "COMPLETED",
+  "g4_verdict": "PASS",
+  "a8_k_sensitivity": {
+    "k_grid_results": {
+      "16": {
+        "k": 16,
+        "actual_k": 16,
+        "cross_family_edges": 4710,
+        "total_labeled_edges": 10045,
+        "cross_family_rate": 0.4689
+      },
+      "32": {
+        "k": 32,
+        "actual_k": 32,
+        "cross_family_edges": 10847,
+        "total_labeled_edges": 19965,
+        "cross_family_rate": 0.5433
+      },
+      "64": {
+        "k": 64,
+        "actual_k": 64,
+        "cross_family_edges": 24293,
+        "total_labeled_edges": 38144,
+        "cross_family_rate": 0.6369
+      },
+      "128": {
+        "k": 128,
+        "actual_k": 128,
+        "cross_family_edges": 54800,
+        "total_labeled_edges": 74158,
+        "cross_family_rate": 0.739
+      },
+      "256": {
+        "k": 256,
+        "actual_k": 256,
+        "cross_family_edges": 117680,
+        "total_labeled_edges": 143153,
+        "cross_family_rate": 0.8221
+      },
+      "512": {
+        "k": 512,
+        "actual_k": 512,
+        "cross_family_edges": 227926,
+        "total_labeled_edges": 261767,
+        "cross_family_rate": 0.8707
+      }
+    },
+    "k_star": 512,
+    "k_star_reported": 256,
+    "k_star_note": "cf_rate doesn't fully saturate; k=256 is conservative operating point (cf_rate=0.82)"
+  },
+  "a9_temp_loo": {
+    "n_valid_samples": 618,
+    "metric": "kendall_tau",
+    "full_multi_signal_tau": 0.2713,
+    "vt_only_tau": 0.0454,
+    "c3_delta_tau_pct": 22.59,
+    "full_multi_signal_inconsistency": 0.4758,
+    "vt_only_inconsistency": 0.4763,
+    "c3_delta_inconsistency_pct": 0.05,
+    "loo_results": {
+      "pe_timestamp": {
+        "tau_without": 0.197,
+        "delta_tau_pct": 7.42,
+        "survives": true
+      },
+      "certificate_validity": {
+        "tau_without": 0.2335,
+        "delta_tau_pct": 3.77,
+        "survives": true
+      },
+      "vt_first_seen": {
+        "tau_without": 0.2901,
+        "delta_tau_pct": -1.88,
+        "survives": false
+      },
+      "code_reuse_order": {
+        "tau_without": 0.1773,
+        "delta_tau_pct": 9.39,
+        "survives": true
+      },
+      "string_markers": {
+        "tau_without": 0.2395,
+        "delta_tau_pct": 3.17,
+        "survives": true
+      }
+    },
+    "n_surviving_signals": 4,
+    "signal_noise_params_seconds": {
+      "pe_timestamp": 259200,
+      "certificate_validity": 1814400,
+      "vt_first_seen": 15552000,
+      "code_reuse_order": 604800,
+      "string_markers": 2592000
+    }
+  },
+  "thresholds": {
+    "Delta_sig_floor": 2.0,
+    "Delta_pct": 10.0,
+    "k_grid": [
+      16,
+      32,
+      64,
+      128,
+      256,
+      512
+    ]
+  },
+  "timing_seconds": 2.09
+}

@@ -1,0 +1,72 @@
+# MalPhylo R-SMOKE-1 — sanity run (experiment_plan.md §4)
+# Goal: pipeline end-to-end on 1K samples; completes, no crash.
+# Gate: pre-G2 (smoke). Status: pending -> COMPLETE after run.
+run_id: "R-SMOKE-1"
+run_type: "smoke"
+dataset_path: "synthetic"      # synthetic corpus for smoke test
+platform: "win32_pe"
+sample_limit: 1000             # 1K samples per experiment_plan.md
+output_dir: "runs"
+seed: 42
+
+# Feature weights alpha (§3.3): sum = 1, fixed a priori, ablated (G4)
+feature_weights:
+  opcode_ngrams: 0.20
+  cfg_topology: 0.15
+  imports: 0.20
+  string_entropy: 0.15
+  section_metadata: 0.10
+  byte_histogram: 0.20
+
+features:
+  enabled:
+    - opcode_ngrams
+    - cfg_topology
+    - imports
+    - string_entropy
+    - section_metadata
+    - byte_histogram
+  index_groups:        # I (§4.2): imports, string-entropy, section-metadata
+    - imports
+    - string_entropy
+    - section_metadata
+  background_groups:   # B (§4.2): opcodes, byte/entropy histograms, CFG
+    - opcode_ngrams
+    - byte_histogram
+    - cfg_topology
+
+packing:
+  section_entropy_threshold: 7.2
+  min_code_entropy: 6.5
+  known_packer_signatures:
+    - UPX
+    - Themida
+    - ASPack
+    - PECompact
+    - MPRESS
+
+temporal:
+  signals:
+    - pe_timestamp
+    - certificate_validity
+    - vt_first_seen
+    - code_reuse_order
+    - string_markers
+  epsilon_seconds: 1
+  sentinel_label: "TAU_BOT"
+
+edge_typing:
+  theta_I_lo: 0.20
+  theta_fp: 0.05
+  theta_I_hi: 0.55
+  theta_B_lo: 0.35
+  k_tool: 3
+  theta_loc: 0.50
+  L_bor: 2
+  theta_pc: 0.60
+  theta_delta: 0.20
+  require_kappa_orientation: true
+
+mst:
+  top_k_neighbors: 50
+  handle_disconnection: true

@@ -1,0 +1,14 @@
+[17:02:29] R-G2 start | run_id=R-G2
+[17:03:03] loaded 102322 embeddings, dim=1000 (32.02s)
+[17:03:03] subsampled to 5000 (seed=20260628)
+[17:03:03] family-labeled in subset: 4932/5000
+[17:03:03] cosine distance matrix (5000, 5000) built in 0.2s
+[17:03:03] B1 reference (R-SMOKE-2): cherry_purity=0.8066
+[17:03:03] B2 UPGMA — building average-linkage tree...
+[17:03:04] B2 done in 0.6s | purity=0.8784 | cophenetic_corr=0.927298
+[17:03:04] B6 NeighborNet — writing NEXUS file for SplitsTree4...
+[17:03:08]   NEXUS written (134978KB)
+[17:03:08] B6 Median-Joining — building approximation network...
+[17:04:29] B6 done in 85.21s | nodes=5100 edges=12273039 cross_family_frac=0.9314
+[17:04:29] B7 kNN graph — k=10...
+[17:04:30] B7 done in 0.99s | edges=35544 components=10 cross_family_frac=0.2849

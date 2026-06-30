@@ -1,0 +1,53 @@
+{
+  "run_id": "R-EDGETYPE-REAL-OPT",
+  "gate": "G3",
+  "milestone": "C2 threshold optimization (D2 fix)",
+  "timestamp": "2026-06-29T10:33:51",
+  "status": "COMPLETED",
+  "baseline_v3": {
+    "f1_mean": 0.5445,
+    "f1_std": 0.003,
+    "rb_mean": 0.35,
+    "per_class_f1_mean": {
+      "parent-child": 0.8048,
+      "code-borrow": 0.5487,
+      "toolkit-share": 0.6497,
+      "convergent": 0.1747
+    },
+    "n_seeds": 5
+  },
+  "optimization": {
+    "patience": 5,
+    "stopped_early": true,
+    "final_non_improve_streak": 5,
+    "n_coarse_points_evaluated": 12,
+    "best_params": {
+      "fb_str_toolkit": 2,
+      "fb_imp_borrow": 3,
+      "fb_section_delta": 0.5,
+      "theta_I_hi": 0.5,
+      "theta_B_lo": 0.3
+    },
+    "best_eval_5seed": {
+      "f1_mean": 0.5516,
+      "f1_std": 0.0151,
+      "rb_mean": 0.3513,
+      "per_class_f1_mean": {
+        "parent-child": 0.8184,
+        "code-borrow": 0.556,
+        "toolkit-share": 0.601,
+        "convergent": 0.2311
+      },
+      "n_seeds": 5
+    },
+    "improved_over_baseline": true,
+    "delta_f1": 0.0071
+  },
+  "verdict": "PASS",
+  "thresholds": {
+    "F_min": 0.2615,
+    "rb_C2_floor": 0.3
+  },
+  "reconciliation_note": "This run OPTIMIZES the honest real-PE C2 metric (D2). The tautological R-EDGETYPE (F1=1.0) is NOT reported as C2; it is retained only as a rule-taxonomy consistency diagnostic.",
+  "timing_seconds": 1.6
+}

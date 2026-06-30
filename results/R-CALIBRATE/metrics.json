@@ -1,0 +1,73 @@
+{
+  "run_id": "R-CALIBRATE",
+  "timestamp": "2026-06-28T19:08:58",
+  "calibration_seed": 20260628,
+  "calibration_fraction": 0.2,
+  "calibration_samples": 600,
+  "evaluation_samples": 2402,
+  "statistics": {
+    "b5_majority_class_f1": 0.1615,
+    "calibration_spearman_rho": 0.0,
+    "calibration_cross_family_fraction": 0.4856
+  },
+  "thresholds": {
+    "N_pct": 5.0,
+    "rho_min": 0.3,
+    "F_min": 0.2615,
+    "Delta_pct": 10.0,
+    "Delta_sig_floor": 2.0,
+    "delta_C1_floor": 0.5,
+    "rb_C2_floor": 0.3,
+    "rb_C3_floor": 0.3,
+    "r_H5_floor": 0.3,
+    "delta_eq": 0.1,
+    "r_ANN_floor": 0.95,
+    "k_star": 32
+  },
+  "power_analysis": {
+    "current_n_families": 13,
+    "current_power": 0.42553260951467925,
+    "effect_size_used": 0.33,
+    "alpha": 0.05,
+    "power_table": {
+      "n=3_delta=0.33": 0.172,
+      "n=3_delta=0.5": 0.279,
+      "n=3_delta=0.66": 0.403,
+      "n=6_delta=0.33": 0.256,
+      "n=6_delta=0.5": 0.442,
+      "n=6_delta=0.66": 0.631,
+      "n=9_delta=0.33": 0.333,
+      "n=9_delta=0.5": 0.576,
+      "n=9_delta=0.66": 0.782,
+      "n=12_delta=0.33": 0.403,
+      "n=12_delta=0.5": 0.683,
+      "n=12_delta=0.66": 0.876,
+      "n=16_delta=0.33": 0.489,
+      "n=16_delta=0.5": 0.789,
+      "n=16_delta=0.66": 0.944,
+      "n=20_delta=0.33": 0.565,
+      "n=20_delta=0.5": 0.863,
+      "n=20_delta=0.66": 0.976,
+      "n=30_delta=0.33": 0.715,
+      "n=30_delta=0.5": 0.956,
+      "n=30_delta=0.66": 0.997,
+      "n=50_delta=0.33": 0.887,
+      "n=50_delta=0.5": 0.996,
+      "n=50_delta=0.66": 1.0
+    },
+    "min_n_for_80pct_power": 38,
+    "method": "Normal approximation for cluster bootstrap; Cliff's \u03b4 variance \u2248 2/(3*n_eff)",
+    "note": "With n=13 families, power to detect Cliff's \u03b4=0.33 is approximately 42.6%. Minimum n for 80% power: 38 families. If n_families < 12, broad C1 claim must be scoped to available families."
+  },
+  "delta_eq_info": {
+    "bootstrap_ci": [
+      0.8462,
+      0.9615
+    ],
+    "ci_half_width": 0.0577,
+    "delta_eq": 0.1,
+    "method": "Fixed domain-justified margin (10%, standard non-inferiority)",
+    "justification": "10% is the standard non-inferiority margin in clinical trials. It exceeds measurement noise (3-5% CI half-width at n\u226512 families) and is below the expected practical effect (MalPhylo targets \u22655% improvement over B1/B2). Bootstrap CI is reported for reference but not used as the margin (degenerate with few families).",
+    "note": "\u03b4_eq=0.10 means MalPhylo's cross-family recovery can be up to 10 percentage points worse than B8 (ML-features control) and still claim non-inferiority. For reference, calibration bootstrap CI half-width=0.0577 (degenerate with 13 families)."
+  }
+}

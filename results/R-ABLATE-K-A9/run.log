@@ -1,0 +1,36 @@
+[21:39:20] ============================================================
+[21:39:20] R-ABLATE-K (A8) + R-ABLATE-TEMP-LOO (A9): G4 Ablations [FIXED]
+[21:39:20] ============================================================
+[21:39:20] Loaded 1000 samples from R-G1
+[21:39:20] Families: 14 ({'Unknown': 285, 'Formbook': 129, 'AgentTesla': 112, 'AsyncRAT': 80, 'CobaltStrike': 51}...)
+[21:39:20] 
+--- A8: k-sensitivity sweep (extended grid) ---
+[21:39:22]   k=16: cf_rate=0.4689 (4710/10045)
+[21:39:22]   k=32: cf_rate=0.5433 (10847/19965)
+[21:39:22]   k=64: cf_rate=0.6369 (24293/38144)
+[21:39:22]   k=128: cf_rate=0.7390 (54800/74158)
+[21:39:22]   k=256: cf_rate=0.8221 (117680/143153)
+[21:39:22]   k=512: cf_rate=0.8707 (227926/261767)
+[21:39:22]   No saturation within grid; k*=512 (max)
+[21:39:22] 
+--- A9: Leave-one-out temporal signal ablation [FIXED: Kendall tau] ---
+[21:39:22]   Valid timestamps: 618/1000 samples
+[21:39:22] 
+  Full multi-signal Kendall tau: 0.2713
+[21:39:22]   VT-only Kendall tau: 0.0454
+[21:39:22]   Triplet inconsistency: full=0.4758, VT-only=0.4763, Δ=+0.05%
+[21:39:22]   Drop pe_timestamp: tau=0.1970, Δ=+7.42% — SURVIVES
+[21:39:22]   Drop certificate_validity: tau=0.2335, Δ=+3.77% — SURVIVES
+[21:39:22]   Drop vt_first_seen: tau=0.2901, Δ=-1.88% — Below floor
+[21:39:22]   Drop code_reuse_order: tau=0.1773, Δ=+9.39% — SURVIVES
+[21:39:22]   Drop string_markers: tau=0.2395, Δ=+3.17% — SURVIVES
+[21:39:22] 
+  Surviving signals (Δ ≥ 2.0%): 4/5
+[21:39:22]   C3 Δ (multi vs VT-only, Kendall tau): +22.59%
+[21:39:22] 
+============================================================
+[21:39:22] G4 VERDICT: PASS
+[21:39:22]   A8: k*=256 (cf_rate at k=256: 0.8221)
+[21:39:22]   A9: 4/5 signals survive (≥2 required)
+[21:39:22]   A9: C3 Δ=+22.59% (floor: 10.0%, metric: Kendall tau)
+[21:39:22] ============================================================

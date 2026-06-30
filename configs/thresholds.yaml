@@ -1,0 +1,145 @@
+_meta:
+  calibrated_at: '2026-06-28T19:08:58'
+  calibration_seed: 20260628
+  calibration_fraction: 0.2
+  calibration_samples: 600
+  evaluation_samples: 2402
+  calibration_families_ge10: 13
+  evaluation_families_ge50: 13
+  b5_majority_class_f1: 0.1615
+  b5_majority_class_fraction: 0.6461
+  calibration_spearman_rho: 0.0
+  calibration_spearman_n_pairs: 0
+  calibration_cross_family_fraction: 0.4856
+  b7_knn_cross_family_fraction: 0.2849
+  b2_upgma_cherry_purity: 0.8784
+  b1_nj_cherry_purity: 0.8066
+  power_analysis:
+    current_n_families: 13
+    current_power: 0.42553260951467925
+    effect_size_used: 0.33
+    alpha: 0.05
+    power_table:
+      n=3_delta=0.33: 0.172
+      n=3_delta=0.5: 0.279
+      n=3_delta=0.66: 0.403
+      n=6_delta=0.33: 0.256
+      n=6_delta=0.5: 0.442
+      n=6_delta=0.66: 0.631
+      n=9_delta=0.33: 0.333
+      n=9_delta=0.5: 0.576
+      n=9_delta=0.66: 0.782
+      n=12_delta=0.33: 0.403
+      n=12_delta=0.5: 0.683
+      n=12_delta=0.66: 0.876
+      n=16_delta=0.33: 0.489
+      n=16_delta=0.5: 0.789
+      n=16_delta=0.66: 0.944
+      n=20_delta=0.33: 0.565
+      n=20_delta=0.5: 0.863
+      n=20_delta=0.66: 0.976
+      n=30_delta=0.33: 0.715
+      n=30_delta=0.5: 0.956
+      n=30_delta=0.66: 0.997
+      n=50_delta=0.33: 0.887
+      n=50_delta=0.5: 0.996
+      n=50_delta=0.66: 1.0
+    min_n_for_80pct_power: 38
+    method: "Normal approximation for cluster bootstrap; Cliff's \u03B4 variance \u2248\
+      \ 2/(3*n_eff)"
+    note: "With n=13 families, power to detect Cliff's \u03B4=0.33 is approximately\
+      \ 42.6%. Minimum n for 80% power: 38 families. If n_families < 12, broad C1\
+      \ claim must be scoped to available families."
+  delta_eq_info:
+    bootstrap_ci: &id001
+    - 0.8462
+    - 0.9615
+    ci_half_width: 0.0577
+    delta_eq: 0.1
+    method: Fixed domain-justified margin (10%, standard non-inferiority)
+    justification: "10% is the standard non-inferiority margin in clinical trials.\
+      \ It exceeds measurement noise (3-5% CI half-width at n\u226512 families) and\
+      \ is below the expected practical effect (MalPhylo targets \u22655% improvement\
+      \ over B1/B2). Bootstrap CI is reported for reference but not used as the margin\
+      \ (degenerate with few families)."
+    note: "\u03B4_eq=0.10 means MalPhylo's cross-family recovery can be up to 10 percentage\
+      \ points worse than B8 (ML-features control) and still claim non-inferiority.\
+      \ For reference, calibration bootstrap CI half-width=0.0577 (degenerate with\
+      \ 13 families)."
+  note: Thresholds fixed from calibration split before unblinding evaluation. Calibration
+    used R-G1 features (1,850 samples). If corpus expands, thresholds may be re-calibrated
+    ONLY if the evaluation has not been unblinded.
+N_pct:
+  value: 5.0
+  description: Minimum cross-family recovery rate improvement over B1/B2 (percentage
+    points)
+  justification: "Conservative 5% absolute improvement floor. B7 kNN baseline cross-family\
+    \ fraction is 0.2849; MalPhylo must achieve \u22650.3349."
+rho_min:
+  value: 0.3
+  description: "Minimum Spearman \u03C1 between MalPhylo sim and MalTree embedding\
+    \ distance (H2)"
+  justification: "Calibration \u03C1=0.0000; floor = max(0.30, calibration_\u03C1\xD7\
+    0.8) = 0.3000."
+F_min:
+  value: 0.2615
+  description: Minimum macro-F1 on Tier-G edge-typing gold set (C2/H3)
+  justification: B5 majority-class baseline macro-F1 = 0.1615; floor = B5 + 0.10 =
+    0.2615.
+Delta_pct:
+  value: 10.0
+  description: Minimum triplet-inconsistency improvement over VT-only rooting (C3/H4,
+    percentage points)
+  justification: Conservative 10% improvement floor for temporal alignment.
+Delta_sig_floor:
+  value: 2.0
+  description: Per-signal marginal value in leave-one-out ablation (A9, percentage
+    points)
+  justification: Small but detectable 2% per-signal improvement floor.
+delta_C1_floor:
+  value: 0.5
+  description: "Cliff's \u03B4 effect-size floor for C1 (cross-family recovery comparison)"
+  justification: Standard small-medium effect size (0.33). Avoids p-value-only claims.
+rb_C2_floor:
+  value: 0.3
+  description: Rank-biserial effect-size floor for C2 (edge-type classification vs
+    B5)
+  justification: Standard small effect size (0.30).
+rb_C3_floor:
+  value: 0.3
+  description: Rank-biserial effect-size floor for C3 (temporal alignment)
+  justification: Standard small effect size (0.30).
+delta_eq:
+  value: 0.1
+  description: Non-inferiority equivalence margin for B8 control (ML-features)
+  justification: "\u03B4_eq=0.10 means MalPhylo's cross-family recovery can be up\
+    \ to 10 percentage points worse than B8 (ML-features control) and still claim\
+    \ non-inferiority. For reference, calibration bootstrap CI half-width=0.0577 (degenerate\
+    \ with 13 families)."
+  method: Fixed domain-justified margin (10%, standard non-inferiority)
+  bootstrap_ci: *id001
+  ci_half_width: 0.0577
+r_ANN_floor:
+  value: 0.95
+  description: ANN recall@k pass floor for G6 (HNSW index quality)
+  justification: Standard 0.95 recall floor for HNSW approximate nearest neighbor.
+k_star:
+  value: 256
+  description: Operating k for A8 k-sensitivity (smallest k at which C1 metric saturates)
+  justification: A8 sweep over {16,32,64,128,256,512} shows cf_rate increases monotonically
+    (0.47→0.87). k=256 is the conservative operating point (cf_rate=0.82). Full saturation
+    not reached within grid; k=256 chosen as balance between recovery and scalability.
+  k_grid:
+  - 16
+  - 32
+  - 64
+  - 128
+  - 256
+  - 512
+  cf_rate_at_k:
+    k16: 0.4689
+    k32: 0.5433
+    k64: 0.6369
+    k128: 0.7390
+    k256: 0.8221
+    k512: 0.8707

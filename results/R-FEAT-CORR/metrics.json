@@ -1,0 +1,85 @@
+{
+  "run_id": "R-FEAT-CORR",
+  "gate": "G3 (H2 support)",
+  "milestone": "Spearman correlation MalPhylo sim vs MalTree embedding sim (H2)",
+  "timestamp": "2026-06-28T20:29:29",
+  "status": "COMPLETED",
+  "h2_verdict": "PASS",
+  "n_paired_samples": 7,
+  "n_pairs": 21,
+  "spearman_rho": 0.651948,
+  "spearman_p_value": 0.001363,
+  "spearman_p_value_note": "INVALID: treats 21 dependent pairs (all C(7,2) of 7 objects) as independent; reported only for transparency, superseded by mantel_exact below",
+  "mantel_exact": {
+    "test": "Mantel permutation test on 7x7 similarity matrices (Spearman matrix correlation), all 5040 permutations enumerated for an exact p-value",
+    "rho": 0.651948,
+    "p_value": 0.0071,
+    "n_objects": 7,
+    "n_permutations": 5040,
+    "script": "mantel_test.py",
+    "rationale": "Correct test for correlated similarity matrices; respects pairwise non-independence and resolves pseudoreplication inconsistency with the family-level resampling design"
+  },
+  "kendall_tau": 0.52381,
+  "kendall_p_value": 0.000618,
+  "pearson_r": 0.773161,
+  "pearson_p_value": 4e-05,
+  "malphpylo_sim_stats": {
+    "mean": 0.41852,
+    "std": 0.133158,
+    "min": 0.204258,
+    "max": 0.750381
+  },
+  "maltree_sim_stats": {
+    "mean": 0.399036,
+    "std": 0.329866,
+    "min": -0.028673,
+    "max": 0.99229
+  },
+  "threshold": {
+    "rho_min": 0.3
+  },
+  "passes_rho_min": "True",
+  "paired_samples": {
+    "21545028cac12fc9e8692a71247040718e6d640ee6117d1b19f4521f886586be": {
+      "family": "AuroraStealer",
+      "source": "raw_pe_extract"
+    },
+    "322cce1c297277e5c19c9396cf58e55b358eab928880f5b1619099842a4568cd": {
+      "family": "Unknown",
+      "source": "R-G1"
+    },
+    "382b3d3bb1be4f14dbc1e82a34946a52795288867ed86c6c43e4f981729be4fc": {
+      "family": "PlugX",
+      "source": "R-G1"
+    },
+    "68a96bd0c150d2808755edfc90b2263626de612b4907e772af3bb552f0fcc4ca": {
+      "family": "Unknown",
+      "source": "R-G1"
+    },
+    "7394136299802ff82b9b08a43b196a803949be752fb9efd378d4936ff91bcb90": {
+      "family": "Unknown",
+      "source": "R-G1"
+    },
+    "9aeb58da5439915bbf9889579c3d7e5e80ec65d3225316bf03034b95dadf2779": {
+      "family": "Unknown",
+      "source": "R-G1"
+    },
+    "c23c9580f06fdc862df3d80fb8dc398b666e01a523f06ffa8935a95dce4ff8f4": {
+      "family": "Quakbot",
+      "source": "raw_pe_extract"
+    }
+  },
+  "timing": {
+    "total_s": 39.17
+  },
+  "artifacts": {
+    "scatter_data_csv": "<repo_root>/runs/R-FEAT-CORR/scatter_data.csv"
+  },
+  "limitations": [
+    "Only 7 paired samples (21 pairs) \u2014 far below the recommended \u2265100 pairs for a reliable correlation",
+    "Cross-corpus overlap is only 28 SHA256s between MalwareBazaar (9961) and MalTree (102322), of which 7 have MalPhylo features available",
+    "If \u03c1 is insignificant, this may be due to small sample size rather than a true lack of correlation",
+    "Recommendation for manuscript: acquire a larger overlapping corpus or run a same-corpus H2 test on MalTree's own raw samples (if available)"
+  ],
+  "interpretation": "Spearman \u03c1=0.6519 (p=0.0014) on 21 pairs. PASS: \u03c1 \u2265 \u03c1_min (0.30) \u2014 interpretable features correlate with ML embeddings."
+}

@@ -1,0 +1,40 @@
+{
+  "run_id": "R-MASCOT-CMP",
+  "milestone": "C1/C3 source-genealogy comparison (MalPhylo vs B3 MASCOT)",
+  "gate": "G3",
+  "timestamp": "2026-06-28T21:05:01",
+  "status": "COMPLETED",
+  "verdict": "PASS",
+  "heldout_pairs": 10000,
+  "same_family_pairs": 5000,
+  "cross_family_pairs": 5000,
+  "malphylo_predictions": {
+    "parent-child": 2482,
+    "no-edge": 2518,
+    "convergent": 3927,
+    "code-borrow": 1073
+  },
+  "b3_predictions": {
+    "parent-child": 2482,
+    "no-edge": 7518
+  },
+  "lineage_agreement": {
+    "edge_existence_agreement": 0.5,
+    "cohens_kappa": 0.2,
+    "parent_child_both": 2482,
+    "parent_child_malphylo_only": 0,
+    "parent_child_b3_only": 0,
+    "parent_child_neither": 7518
+  },
+  "cross_family_recovery": {
+    "malphylo_rate": 1.0,
+    "b3_rate": 0.0,
+    "delta_pct": 100.0,
+    "N_pct_threshold": 5.0,
+    "malphylo_cross_edge_types": {
+      "convergent": 3927,
+      "code-borrow": 1073
+    }
+  },
+  "timing_seconds": 0.85
+}

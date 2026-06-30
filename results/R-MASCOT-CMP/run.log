@@ -1,0 +1,23 @@
+[21:05:00] ============================================================
+[21:05:00] R-MASCOT-CMP: C1/C3 Source-genealogy comparison (MalPhylo vs B3)
+[21:05:00] ============================================================
+[21:05:00] Loaded 6031 MASCOT specimens (0.6s)
+[21:05:00] Tier-G held-out pairs: 3139
+[21:05:00] Labeled specimens: 325
+[21:05:00] Held-out pairs sampled: 10000 (56754 attempts)
+[21:05:01] Classification done (0.2s)
+[21:05:01] MalPhylo predictions: {'parent-child': 2482, 'no-edge': 2518, 'convergent': 3927, 'code-borrow': 1073}
+[21:05:01] B3 predictions: {'parent-child': 2482, 'no-edge': 7518}
+[21:05:01] Edge-existence agreement: 0.5000
+[21:05:01] Cohen's kappa (edge/no-edge): 0.2
+[21:05:01] Parent-child: both=2482, MalPhylo-only=0, B3-only=0, neither=7518
+[21:05:01] Cross-family recovery: MalPhylo=5000/5000 (1.0000), B3=0/5000 (0.0000)
+[21:05:01] MalPhylo cross-family edge types: {'convergent': 3927, 'code-borrow': 1073}
+[21:05:01] Same-family parent-child: MalPhylo=2482/5000, B3=2482/5000
+[21:05:01] 
+============================================================
+[21:05:01] VERDICT: PASS
+[21:05:01]   Cross-family recovery Δ: 100.00% (threshold N%=5.0)
+[21:05:01]   Lineage agreement (kappa): 0.2
+[21:05:01]   Parent-child agreement: both=2482, MP-only=0, B3-only=0
+[21:05:01] ============================================================

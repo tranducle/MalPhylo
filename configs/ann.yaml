@@ -1,0 +1,5 @@
+M_HNSW: 32
+ef_Construction: 200
+ef_Search: 512
+k_star: 32
+space: cosine

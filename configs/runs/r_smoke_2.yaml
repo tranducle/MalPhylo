@@ -1,0 +1,23 @@
+# R-SMOKE-2 — MalTree NJ baseline reproduction (B1) on Zenodo fused embeddings, 5K subset.
+# Sanity run, pre-G2 (gates G2). NO ML TRAINING.
+run_id: R-SMOKE-2
+baseline: B1_maltree_NJ
+output_dir: runs
+
+# Data (manual fetch — see data/maltree/MANUAL_DOWNLOAD.md)
+embeddings_path: data/maltree/embeddings_fused.json
+dim_expect: null        # accept whatever dimension MalTree released; logged in metrics.json
+
+# Subsample (anti-tuning: seed fixed a priori)
+subset_size: 5000
+seed: 20260628
+
+# Distance + rooting
+distance: cosine        # matches experiment_plan §5 (B8 control uses the same cosine on these embeddings)
+midpoint_root: true     # outgroup-free; VT first-seen τ not in the embedding JSON
+
+# Published-range target (informational; the temporal-consistency metric proper needs VT τ,
+# deferred to R-G2). Structural reproduction targets:
+#   - NJ completes without degenerate-pair failure on 5K.
+#   - family-cherry-purity >> random baseline (1/538 ≈ 0.0019) if labels are present.
+published_range_note: "MalTree ICML 2026 reported temporal-consistency on VT-rooted trees; R-SMOKE-2 verifies the NJ structural reproduction and family-clustering purity as the embedding-only sanity. Full temporal-consistency vs published range is an R-G2 deliverable once VT τ is joined."

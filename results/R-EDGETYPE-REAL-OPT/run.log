@@ -1,0 +1,10 @@
+[10:33:49] ======================================================================
+[10:33:49] R-EDGETYPE-REAL-OPT: C2 threshold optimization (D2 fix)
+[10:33:49] ======================================================================
+[10:33:49] Thresholds: F_min=0.2615, rb_C2_floor=0.3
+[10:33:50] Good PE samples: 799
+[10:33:50] Baseline (v3): F1=0.5445 ± 0.003, per-class={'parent-child': 0.8048, 'code-borrow': 0.5487, 'toolkit-share': 0.6497, 'convergent': 0.1747}
+[10:33:50] Running optimization loop (patience=5)...
+[10:33:51] Best params: {'fb_str_toolkit': 2, 'fb_imp_borrow': 3, 'fb_section_delta': 0.5, 'theta_I_hi': 0.5, 'theta_B_lo': 0.3}
+[10:33:51] Best F1 (5-seed): 0.5516 ± 0.0151, rb=0.3513, per-class={'parent-child': 0.8184, 'code-borrow': 0.556, 'toolkit-share': 0.601, 'convergent': 0.2311}
+[10:33:51] Stopped early: True (streak=5, evaluated=12 coarse points)

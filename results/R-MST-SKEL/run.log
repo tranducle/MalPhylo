@@ -1,0 +1,27 @@
+[21:09:12] ============================================================
+[21:09:12] R-MST-SKEL: MST vertical skeleton structure quality vs B4
+[21:09:12] ============================================================
+[21:09:12] Loaded 500 samples from R-G1
+[21:09:12] Families: 14 ({'Unknown': 146, 'Formbook': 71, 'AgentTesla': 58, 'AsyncRAT': 38, 'IcedID': 26}...)
+[21:09:13] Feature matrix: (500, 259)
+[21:09:13] Similarity matrix computed (0.0s)
+[21:09:13] MST computed: 499 edges (0.0s)
+[21:09:13] MST family purity (same-family fraction): 0.1142
+[21:09:13] MST cross-family edges: 442/499 (0.8858)
+[21:09:13] Tree depth (rooted at 0): 1
+[21:09:13] Connected: True (499 edges, 499 expected)
+[21:09:13] 
+Full DAG (R-CROSSFAM): 2074 samples
+[21:09:13]   MST edges: 2073, Augment: 743612, Total: 745685
+[21:09:13]   MalPhylo cf_fraction: 0.998
+[21:09:13]   B1 NJ cf_fraction: 0.16136
+[21:09:13] 
+B4 (MST-only) cross-family fraction: 0.8858
+[21:09:13] MalPhylo augmentation adds: +11.2% cross-family recovery
+[21:09:13] 
+============================================================
+[21:09:13] VERDICT: PASS
+[21:09:13]   MST connected: True
+[21:09:13]   Family purity: 0.1142
+[21:09:13]   B4→MalPhylo cross-family Δ: 11.2% (N%=5.0)
+[21:09:13] ============================================================

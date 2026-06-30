@@ -1,0 +1,8 @@
+[17:07:54] Loading MASCOT specimens...
+[17:07:54] Loaded 6031 specimens (0.6s)
+[17:07:54] Toolkit type distribution: {'injector': 61, 'builder': 13, 'crypter': 8, 'rootkit': 6, 'loader': 3, 'obfuscator': 2, 'packer': 1, 'keylogger-kit': 1}
+[17:07:54] Building toolkit-share edges...
+[17:07:54] Generated 9 new toolkit-share edges
+[17:07:54] Existing Tier-G edges: 3130
+[17:07:54] Added 9 new toolkit-share edges (after dedup)
+[17:07:54] Total Tier-G edges now: 3139

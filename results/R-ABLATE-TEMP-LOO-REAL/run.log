@@ -1,0 +1,88 @@
+[23:28:23] ======================================================================
+[23:28:23] A9 REAL v2: Within-family triplet inconsistency (4 real signals, 5 runs)
+[23:28:23] ======================================================================
+[23:28:25]   pe_timestamp: 1880 samples
+[23:28:25]   first_seen: 3002 samples
+[23:28:25]   string_markers: 1036 samples
+[23:28:25]   code_reuse_order: 1161 samples
+[23:28:25] 
+  Evaluation set: 1519 samples (≥2 signals, known family)
+[23:28:26] 
+--- Run 1/5 (seed=42) ---
+[23:28:26]   Full multi-signal inconsistency: 0.4056
+[23:28:26]   pe_timestamp-only inconsistency: 0.3718
+[23:28:26]   first_seen-only inconsistency: 0.4292
+[23:28:26]   string_markers-only inconsistency: 0.2114
+[23:28:26]   code_reuse_order-only inconsistency: 0.3674
+[23:28:26]   Drop pe_timestamp: inc=0.4102, Δ=+0.46% — Below floor
+[23:28:26]   Drop first_seen: inc=0.3778, Δ=-2.78% — Below floor
+[23:28:27]   Drop string_markers: inc=0.4166, Δ=+1.10% — Below floor
+[23:28:27]   Drop code_reuse_order: inc=0.4128, Δ=+0.72% — Below floor
+[23:28:27] 
+  Surviving: 0/4 (≥2 required)
+[23:28:27]   C3 Δ (first_seen-only → multi): +2.36% (floor: 10.0%)
+[23:28:27] 
+--- Run 2/5 (seed=43) ---
+[23:28:27]   Full multi-signal inconsistency: 0.4132
+[23:28:27]   pe_timestamp-only inconsistency: 0.3712
+[23:28:27]   first_seen-only inconsistency: 0.4318
+[23:28:27]   string_markers-only inconsistency: 0.2094
+[23:28:27]   code_reuse_order-only inconsistency: 0.3672
+[23:28:27]   Drop pe_timestamp: inc=0.4210, Δ=+0.78% — Below floor
+[23:28:27]   Drop first_seen: inc=0.3810, Δ=-3.22% — Below floor
+[23:28:27]   Drop string_markers: inc=0.4088, Δ=-0.44% — Below floor
+[23:28:27]   Drop code_reuse_order: inc=0.4250, Δ=+1.18% — Below floor
+[23:28:27] 
+  Surviving: 0/4 (≥2 required)
+[23:28:27]   C3 Δ (first_seen-only → multi): +1.86% (floor: 10.0%)
+[23:28:27] 
+--- Run 3/5 (seed=44) ---
+[23:28:27]   Full multi-signal inconsistency: 0.4114
+[23:28:27]   pe_timestamp-only inconsistency: 0.3842
+[23:28:27]   first_seen-only inconsistency: 0.4326
+[23:28:27]   string_markers-only inconsistency: 0.2144
+[23:28:27]   code_reuse_order-only inconsistency: 0.3780
+[23:28:27]   Drop pe_timestamp: inc=0.4188, Δ=+0.74% — Below floor
+[23:28:27]   Drop first_seen: inc=0.3768, Δ=-3.46% — Below floor
+[23:28:27]   Drop string_markers: inc=0.4170, Δ=+0.56% — Below floor
+[23:28:27]   Drop code_reuse_order: inc=0.4186, Δ=+0.72% — Below floor
+[23:28:27] 
+  Surviving: 0/4 (≥2 required)
+[23:28:27]   C3 Δ (first_seen-only → multi): +2.12% (floor: 10.0%)
+[23:28:27] 
+--- Run 4/5 (seed=45) ---
+[23:28:27]   Full multi-signal inconsistency: 0.4128
+[23:28:27]   pe_timestamp-only inconsistency: 0.3794
+[23:28:27]   first_seen-only inconsistency: 0.4418
+[23:28:27]   string_markers-only inconsistency: 0.2222
+[23:28:27]   code_reuse_order-only inconsistency: 0.3736
+[23:28:27]   Drop pe_timestamp: inc=0.4212, Δ=+0.84% — Below floor
+[23:28:27]   Drop first_seen: inc=0.3828, Δ=-3.00% — Below floor
+[23:28:27]   Drop string_markers: inc=0.4068, Δ=-0.60% — Below floor
+[23:28:27]   Drop code_reuse_order: inc=0.4228, Δ=+1.00% — Below floor
+[23:28:27] 
+  Surviving: 0/4 (≥2 required)
+[23:28:27]   C3 Δ (first_seen-only → multi): +2.90% (floor: 10.0%)
+[23:28:27] 
+--- Run 5/5 (seed=46) ---
+[23:28:27]   Full multi-signal inconsistency: 0.4066
+[23:28:27]   pe_timestamp-only inconsistency: 0.3752
+[23:28:27]   first_seen-only inconsistency: 0.4378
+[23:28:27]   string_markers-only inconsistency: 0.2158
+[23:28:27]   code_reuse_order-only inconsistency: 0.3766
+[23:28:27]   Drop pe_timestamp: inc=0.4120, Δ=+0.54% — Below floor
+[23:28:27]   Drop first_seen: inc=0.3772, Δ=-2.94% — Below floor
+[23:28:27]   Drop string_markers: inc=0.4122, Δ=+0.56% — Below floor
+[23:28:28]   Drop code_reuse_order: inc=0.4122, Δ=+0.56% — Below floor
+[23:28:28] 
+  Surviving: 0/4 (≥2 required)
+[23:28:28]   C3 Δ (first_seen-only → multi): +3.12% (floor: 10.0%)
+[23:28:28] 
+======================================================================
+[23:28:28] STABILITY CHECK (5 runs)
+[23:28:28]   All PASS: False
+[23:28:28]   C3 Δ: mean=2.47%, std=0.47 — [2.36, 1.86, 2.12, 2.9, 3.12]
+[23:28:28]   Surviving: [0, 0, 0, 0, 0]
+[23:28:28]   Stable: True
+[23:28:28]   Final: STABLE but FAIL
+[23:28:28] ======================================================================

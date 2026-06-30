@@ -1,0 +1,214 @@
+{
+  "run_id": "R-ABLATE-TEMP-LOO-REAL",
+  "version": "v2",
+  "milestone": "A9 REAL within-family triplet inconsistency",
+  "gate": "G4",
+  "timestamp": "2026-06-28T23:28:28",
+  "status": "COMPLETED",
+  "verdict": "STABLE but FAIL",
+  "n_runs": 5,
+  "all_pass": false,
+  "stable": true,
+  "temporal_signals": [
+    "pe_timestamp",
+    "first_seen",
+    "string_markers",
+    "code_reuse_order"
+  ],
+  "signal_availability": {
+    "pe_timestamp": 1880,
+    "first_seen": 3002,
+    "string_markers": 1036,
+    "code_reuse_order": 1161
+  },
+  "n_eval_samples": 1519,
+  "run_results": [
+    {
+      "run": 1,
+      "seed": 42,
+      "n_eval": 1519,
+      "full_inconsistency": 0.4056,
+      "single_inconsistency": {
+        "pe_timestamp": 0.3718,
+        "first_seen": 0.4292,
+        "string_markers": 0.2114,
+        "code_reuse_order": 0.3674
+      },
+      "loo_results": {
+        "pe_timestamp": {
+          "inconsistency_without": 0.4102,
+          "delta_pct": 0.46,
+          "survives": false
+        },
+        "first_seen": {
+          "inconsistency_without": 0.3778,
+          "delta_pct": -2.78,
+          "survives": false
+        },
+        "string_markers": {
+          "inconsistency_without": 0.4166,
+          "delta_pct": 1.1,
+          "survives": false
+        },
+        "code_reuse_order": {
+          "inconsistency_without": 0.4128,
+          "delta_pct": 0.72,
+          "survives": false
+        }
+      },
+      "n_surviving": 0,
+      "c3_delta_pct": 2.36
+    },
+    {
+      "run": 2,
+      "seed": 43,
+      "n_eval": 1519,
+      "full_inconsistency": 0.4132,
+      "single_inconsistency": {
+        "pe_timestamp": 0.3712,
+        "first_seen": 0.4318,
+        "string_markers": 0.2094,
+        "code_reuse_order": 0.3672
+      },
+      "loo_results": {
+        "pe_timestamp": {
+          "inconsistency_without": 0.421,
+          "delta_pct": 0.78,
+          "survives": false
+        },
+        "first_seen": {
+          "inconsistency_without": 0.381,
+          "delta_pct": -3.22,
+          "survives": false
+        },
+        "string_markers": {
+          "inconsistency_without": 0.4088,
+          "delta_pct": -0.44,
+          "survives": false
+        },
+        "code_reuse_order": {
+          "inconsistency_without": 0.425,
+          "delta_pct": 1.18,
+          "survives": false
+        }
+      },
+      "n_surviving": 0,
+      "c3_delta_pct": 1.86
+    },
+    {
+      "run": 3,
+      "seed": 44,
+      "n_eval": 1519,
+      "full_inconsistency": 0.4114,
+      "single_inconsistency": {
+        "pe_timestamp": 0.3842,
+        "first_seen": 0.4326,
+        "string_markers": 0.2144,
+        "code_reuse_order": 0.378
+      },
+      "loo_results": {
+        "pe_timestamp": {
+          "inconsistency_without": 0.4188,
+          "delta_pct": 0.74,
+          "survives": false
+        },
+        "first_seen": {
+          "inconsistency_without": 0.3768,
+          "delta_pct": -3.46,
+          "survives": false
+        },
+        "string_markers": {
+          "inconsistency_without": 0.417,
+          "delta_pct": 0.56,
+          "survives": false
+        },
+        "code_reuse_order": {
+          "inconsistency_without": 0.4186,
+          "delta_pct": 0.72,
+          "survives": false
+        }
+      },
+      "n_surviving": 0,
+      "c3_delta_pct": 2.12
+    },
+    {
+      "run": 4,
+      "seed": 45,
+      "n_eval": 1519,
+      "full_inconsistency": 0.4128,
+      "single_inconsistency": {
+        "pe_timestamp": 0.3794,
+        "first_seen": 0.4418,
+        "string_markers": 0.2222,
+        "code_reuse_order": 0.3736
+      },
+      "loo_results": {
+        "pe_timestamp": {
+          "inconsistency_without": 0.4212,
+          "delta_pct": 0.84,
+          "survives": false
+        },
+        "first_seen": {
+          "inconsistency_without": 0.3828,
+          "delta_pct": -3.0,
+          "survives": false
+        },
+        "string_markers": {
+          "inconsistency_without": 0.4068,
+          "delta_pct": -0.6,
+          "survives": false
+        },
+        "code_reuse_order": {
+          "inconsistency_without": 0.4228,
+          "delta_pct": 1.0,
+          "survives": false
+        }
+      },
+      "n_surviving": 0,
+      "c3_delta_pct": 2.9
+    },
+    {
+      "run": 5,
+      "seed": 46,
+      "n_eval": 1519,
+      "full_inconsistency": 0.4066,
+      "single_inconsistency": {
+        "pe_timestamp": 0.3752,
+        "first_seen": 0.4378,
+        "string_markers": 0.2158,
+        "code_reuse_order": 0.3766
+      },
+      "loo_results": {
+        "pe_timestamp": {
+          "inconsistency_without": 0.412,
+          "delta_pct": 0.54,
+          "survives": false
+        },
+        "first_seen": {
+          "inconsistency_without": 0.3772,
+          "delta_pct": -2.94,
+          "survives": false
+        },
+        "string_markers": {
+          "inconsistency_without": 0.4122,
+          "delta_pct": 0.56,
+          "survives": false
+        },
+        "code_reuse_order": {
+          "inconsistency_without": 0.4122,
+          "delta_pct": 0.56,
+          "survives": false
+        }
+      },
+      "n_surviving": 0,
+      "c3_delta_pct": 3.12
+    }
+  ],
+  "thresholds": {
+    "Delta_sig_floor": 2.0,
+    "Delta_pct": 10.0
+  },
+  "metric": "within_family_triplet_inconsistency",
+  "evaluation_type": "REAL temporal signals",
+  "timing_seconds": 4.07
+}

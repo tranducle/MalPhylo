@@ -1,0 +1,15 @@
+[20:28:50] === R-FEAT-CORR START ===
+[20:28:50] Threshold: ρ_min=0.3
+[20:28:50] Loading MalTree embeddings...
+[20:29:27] Loaded 102322 MalTree embeddings, dim=1000
+[20:29:27] MalwareBazaar manifest: 9961 entries
+[20:29:27] SHA256 overlap: 28
+[20:29:27] R-G1 features: 3002 samples
+[20:29:27] From R-G1 overlap: 5 samples
+[20:29:29] From raw PE extraction: 2 samples
+[20:29:29] Total paired samples: 7, pairs: 21
+[20:29:29] Spearman ρ: 0.6519 (p=0.0014)
+[20:29:29] Kendall τ: 0.5238 (p=0.0006)
+[20:29:29] Pearson r: 0.7732 (p=0.0000)
+[20:29:29] MalPhylo sim: mean=0.4185, std=0.1332
+[20:29:29] MalTree sim:  mean=0.3990, std=0.3299

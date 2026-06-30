@@ -1,0 +1,73 @@
+{
+  "run_id": "R-G1",
+  "milestone": "feature integrity",
+  "gate": "G1",
+  "timestamp": "2026-06-28T19:00:32",
+  "status": "COMPLETED",
+  "verdict": "PASS",
+  "summary": {
+    "total_samples_on_disk": 3395,
+    "samples_processed": 3002,
+    "parse_ok": 3002,
+    "parse_fail": 0,
+    "coverage_pct": 100.0,
+    "packed_count": 2181,
+    "packed_pct": 72.65,
+    "fallback_to_byte_path": 1,
+    "fallback_pct": 0.03,
+    "families_seen": {
+      "Unknown": 850,
+      "Formbook": 414,
+      "AgentTesla": 339,
+      "AsyncRAT": 246,
+      "NjRAT": 120,
+      "PrivateLoader": 120,
+      "RedLineStealer": 120,
+      "IcedID": 120,
+      "CobaltStrike": 120,
+      "RaccoonStealer": 119,
+      "PlugX": 119,
+      "Amadey": 119,
+      "NanoCore": 118,
+      "Bumblebee": 77,
+      "RedLine": 1
+    },
+    "n_families": 15
+  },
+  "feature_group_trust": {
+    "opcode_ngrams": {
+      "trusted": 821,
+      "untrusted": 2181
+    },
+    "cfg_topology": {
+      "trusted": 821,
+      "untrusted": 2181
+    },
+    "imports": {
+      "trusted": 3002,
+      "untrusted": 0
+    },
+    "string_entropy": {
+      "trusted": 3002,
+      "untrusted": 0
+    },
+    "section_metadata": {
+      "trusted": 3002,
+      "untrusted": 0
+    },
+    "byte_histogram": {
+      "trusted": 3002,
+      "untrusted": 0
+    }
+  },
+  "timing": {
+    "total_seconds": 2509.37,
+    "per_sample_seconds": 0.8359
+  },
+  "errors": [],
+  "n_errors_total": 0,
+  "artifacts": {
+    "features": "<repo_root>/runs/R-G1/features.jsonl",
+    "packing_log": "<repo_root>/runs/R-G1/packing_log.jsonl"
+  }
+}

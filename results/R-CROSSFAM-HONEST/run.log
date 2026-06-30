@@ -1,0 +1,15 @@
+[11:25:47] === R-CROSSFAM-HONEST START (D1 fix) ===
+[11:25:47] Thresholds: N%=5.0, delta_C1_floor=0.5
+[11:25:48] Loaded 2074 samples in 12 families
+[11:25:48] Loading cached similarity matrix from <repo_root>/runs/R-CROSSFAM-HONEST/sim_matrix.npy
+[11:25:48] Building baselines (B1 NJ, B2 UPGMA, B6 network)...
+[11:27:03] B6 edge count (the matched budget) = 15246
+[11:27:03] === Density-matched comparison @ budget=15246 edges ===
+[11:27:03] B1@budget cf_frac=0.288535
+[11:27:03] B6@budget cf_frac=0.288535
+[11:27:03] B4(MST,n-1) cf_frac=0.038109
+[11:27:03] Theta optimization loop (sparse cap=5n, patience=5):
+[11:27:07] Best theta_min=0.6, mean_sim_augment=0.997109, total_edges=10370, density=0.004824, stopped_early=True
+[11:27:10] Matched sparse budget=10370: MalPhylo cf=0.860559, B6 cf=0.220347, delta=0.6402
+[11:27:10] G2 diagnostic: mean CF sim=0.509409, median=0.487562, frac>0.9=0.062051
+[11:27:10]   CF pairs above theta=0.60: 567193 (cap 5n=10370 binds)
