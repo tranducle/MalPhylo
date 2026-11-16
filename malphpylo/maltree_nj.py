@@ -1,23 +1,23 @@
-"""B1 baseline — MalTree NJ (Neighbor-Joining) reproduction on Zenodo embeddings.
+"""B1 baseline - MalTree NJ (Neighbor-Joining) reproduction on Zenodo embeddings.
 
 Implements Saitou-Nei Neighbor-Joining from scratch on numpy/scipy. This is a deterministic
 graph/statistical algorithm (no ML training), consistent with the project's no-ML constraint
-(methodology §0/§3/§4.2; experiment_plan §0 "NO ML TRAINING").
+(Sections 3.1-3.5; evaluation protocol "NO ML TRAINING").
 
 Methodology grounding:
-- experiment_plan.md §1 baseline B1: "MalTree NJ + outgroup rooting (reproduce on MalTree
+- baseline specification baseline B1: "MalTree NJ + outgroup rooting (reproduce on MalTree
   Zenodo embeddings)".
-- experiment_plan.md §4 R-SMOKE-2: "MalTree baseline reproduction on 5K subset | B1 (MalTree NJ)
+- pipeline specification (Section 3.4) R-SMOKE-2: "MalTree baseline reproduction on 5K subset | B1 (MalTree NJ)
   | temporal-consistency in published range" (gates G2).
-- experiment_plan.md §5: cosine distance for the B8 control; here the *same* cosine distance is
+- pipeline configuration schema: cosine distance for the B8 control; here the *same* cosine distance is
   applied to MalTree's own released embeddings to reproduce their NJ tree.
 
 Pipeline:
   load JSON (sha256 -> embedding) -> subsample k (seed-fixed) -> cosine distance matrix ->
   Saitou-Nei NJ -> midpoint rooting -> Newick + metrics.
 
-Outputs (per experiment_plan §5 artifact contract):
-  runs/<RUN_ID>/metrics.json, run.log, tree.newick, config.yaml.
+Outputs (per artifact layout specification):
+  results/<RUN_ID>/metrics.json, run.log, tree.newick, config.yaml.
 """
 from __future__ import annotations
 
@@ -34,9 +34,9 @@ import yaml
 sys.setrecursionlimit(50000)
 
 
-# --------------------------------------------------------------------------- #
+# ===========================================================================
 # Data loading + subsampling
-# --------------------------------------------------------------------------- #
+# ===========================================================================
 def load_embeddings(path: str, dim_expect: int | None = None) -> tuple[list[str], np.ndarray, dict]:
     """Load MalTree embeddings JSON.
 
@@ -81,7 +81,7 @@ def load_embeddings(path: str, dim_expect: int | None = None) -> tuple[list[str]
 
 
 def subsample(sha_list: list[str], emb: np.ndarray, k: int, seed: int) -> tuple[list[str], np.ndarray]:
-    """Seed-fixed subsample of k rows (anti-tuning; experiment_plan §1 Controls)."""
+    """Seed-fixed subsample of k rows (anti-tuning; evaluation controls)."""
     n = len(sha_list)
     k = min(k, n)
     rng = np.random.default_rng(seed)
@@ -90,9 +90,9 @@ def subsample(sha_list: list[str], emb: np.ndarray, k: int, seed: int) -> tuple[
     return [sha_list[i] for i in idx], emb[idx]
 
 
-# --------------------------------------------------------------------------- #
+# ===========================================================================
 # Cosine distance matrix
-# --------------------------------------------------------------------------- #
+# ===========================================================================
 def cosine_distance_matrix(emb: np.ndarray) -> np.ndarray:
     """Pairwise cosine *distance* (1 - cosine similarity) in [0, 2]."""
     norms = np.linalg.norm(emb, axis=1, keepdims=True)
@@ -106,9 +106,9 @@ def cosine_distance_matrix(emb: np.ndarray) -> np.ndarray:
     return d
 
 
-# --------------------------------------------------------------------------- #
+# ===========================================================================
 # Saitou-Nei Neighbor-Joining (from scratch, deterministic, no ML)
-# --------------------------------------------------------------------------- #
+# ===========================================================================
 class NJNode:
     __slots__ = ("name", "children", "blen")  # children: list[(NJNode, branch_len)]
 
@@ -195,13 +195,12 @@ def neighbor_joining(names: list[str], D: np.ndarray) -> NJNode:
     return nodes[active_idx[0]]
 
 
-# --------------------------------------------------------------------------- #
+# ===========================================================================
 # Midpoint rooting (outgroup-free; used when no outgroup τ is available)
-# --------------------------------------------------------------------------- #
+# ===========================================================================
 def midpoint_root(tree: NJNode) -> NJNode:
-    """Root the unrooted tree at the midpoint of its longest path (standard outgroup-free
-    rooting). Converts the arbitrarily-rooted NJ output into a biologically-standard midpoint
-    tree. Returns a new root NJNode."""
+    """Compute the longest-path diameter for outgroup-free sanity diagnostics without
+    mutating branching topology, ensure tree.name is populated, and return tree."""
     # collect leaves + all edges (parent->child branch lengths)
     edges: list[tuple[NJNode, NJNode, float]] = []
 
@@ -253,9 +252,9 @@ def midpoint_root(tree: NJNode) -> NJNode:
     return tree
 
 
-# --------------------------------------------------------------------------- #
+# ===========================================================================
 # Sanity metrics (structural reproduction)
-# --------------------------------------------------------------------------- #
+# ===========================================================================
 def tree_branch_stats(tree: NJNode) -> dict:
     blens: list[float] = []
 
@@ -328,9 +327,9 @@ def family_clustering_purity(tree: NJNode, families: dict[str, str]) -> dict | N
     }
 
 
-# --------------------------------------------------------------------------- #
+# ===========================================================================
 # Runner
-# --------------------------------------------------------------------------- #
+# ===========================================================================
 def run(config_path: str) -> dict:
     with open(config_path, "r") as fh:
         cfg = yaml.safe_load(fh)
@@ -389,7 +388,7 @@ def run(config_path: str) -> dict:
         "data_meta": meta_bundle["meta"],
         "status": "COMPLETED",
         "note": ("Structural NJ reproduction sanity. Temporal-consistency metric proper "
-                 "requires VT first-seen τ (see data/maltree/MANUAL_DOWNLOAD.md) and is "
+                 "requires VT first-seen τ (see data/README.md) and is "
                  "deferred to R-G2."),
     }
     (out_dir / "metrics.json").write_text(json.dumps(metrics, indent=2))
@@ -402,8 +401,9 @@ def run(config_path: str) -> dict:
 
 if __name__ == "__main__":
     import sys
-    if len(sys.argv) < 2:
-        raise SystemExit("usage: python -m malphpylo.maltree_nj <config.yaml>")
+    if len(sys.argv) < 2 or sys.argv[1] in ("-h", "--help"):
+        print("usage: python -m malphpylo.maltree_nj <config.yaml>")
+        raise SystemExit(0 if len(sys.argv) >= 2 else 1)
     m = run(sys.argv[1])
     print(json.dumps({k: m[k] for k in ("run_id", "status", "subset_size", "seconds_total",
                                         "tree_branch_stats", "family_clustering_purity")}, indent=2))

@@ -1,8 +1,8 @@
 """MalPhylo CLI entry point.
 
 Usage:
-    python -m malphpylo run configs/r_smoke_1.yaml
-    python -m malphpylo run configs/r_smoke_1.yaml --limit 200
+    python -m malphpylo run configs/runs/r_smoke_1.yaml
+    python -m malphpylo run configs/runs/r_smoke_1.yaml --limit 200
 """
 from __future__ import annotations
 

@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
-"""R-ANN (G5/G6): HNSW index quality — recall@k vs exact kNN.
+"""R-ANN (G5/G6): HNSW index quality - recall@k vs exact kNN.
 
-Experiment_plan §5: "HNSW hyperparameters are pinned a priori in config/ann.yaml
-— M_HNSW≥32, ef_Search≥512, ef_Construction≥200".
+HNSW configuration specification: "HNSW hyperparameters are pinned a priori in configs/ann.yaml
+ -  M_HNSW≥32, ef_Search≥512, ef_Construction≥200".
 Threshold: recall@k ≥ r_ANN_floor (0.95) at k*=32.
 
 Builds HNSW index on MalPhylo interpretable feature vectors from R-G1,
 compares ANN recall@k against exact brute-force kNN.
 
-Outputs: runs/R-ANN/{metrics.json, run.log, config.yaml}
+Outputs: results/R-ANN/{metrics.json, run.log, config.yaml}
 """
 from __future__ import annotations
 
@@ -19,14 +19,14 @@ import numpy as np
 import yaml
 
 HERE = Path(__file__).resolve().parent
-EXP_DIR = HERE.parent
-sys.path.insert(0, str(EXP_DIR / "src"))
+EXP_DIR = HERE.parent.parent
+sys.path.insert(0, str(EXP_DIR))
 
-RG1_PATH = EXP_DIR / "runs" / "R-G1" / "features.jsonl"
-THRESH_PATH = EXP_DIR / "config" / "thresholds.yaml"
-OUT_DIR = EXP_DIR / "runs" / "R-ANN"
+RG1_PATH = EXP_DIR / "results" / "R-G1" / "features.jsonl"
+THRESH_PATH = EXP_DIR / "configs" / "thresholds.yaml"
+OUT_DIR = EXP_DIR / "results" / "R-ANN"
 
-# HNSW hyperparameters (pinned a priori per experiment_plan §5)
+# HNSW hyperparameters (pinned a priori per HNSW/baseline specification)
 M_HNSW = 32
 EF_CONSTRUCTION = 200
 EF_SEARCH = 512  # ≥ 2 * max(k_grid) = 2*256 = 512
@@ -80,7 +80,7 @@ def load_features(path: str, limit: int) -> Tuple[np.ndarray, List[str]]:
     return np.array(vectors, dtype=float), ids
 
 
-def main():
+def main(write_config: bool = False):
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     log_lines: List[str] = []
     def log(m):
@@ -92,7 +92,7 @@ def main():
     r_floor = thresh["r_ANN_floor"]["value"]
 
     log("=" * 60)
-    log("R-ANN: HNSW index quality — recall@k vs exact kNN")
+    log("R-ANN: HNSW index quality - recall@k vs exact kNN")
     log("=" * 60)
     log(f"HNSW: M={M_HNSW}, ef_construction={EF_CONSTRUCTION}, ef_search={EF_SEARCH}")
     log(f"k grid: {K_GRID}, k*={K_STAR}")
@@ -123,7 +123,7 @@ def main():
     norms[norms == 0] = 1e-10
     features_norm = features / norms
 
-    # --- Exact kNN (brute force) ---
+    # === Exact kNN (brute force) ===
     t1 = time.time()
     log("Computing exact kNN (brute force)...")
     max_k = max(K_GRID)
@@ -136,17 +136,18 @@ def main():
         exact_knn[k] = np.argpartition(-sim_matrix, k, axis=1)[:, :k]
     log(f"Exact kNN done ({time.time()-t1:.1f}s)")
 
-    # --- HNSW ANN index ---
+    # === HNSW ANN index ===
     import hnswlib
     t2 = time.time()
     log("Building HNSW index...")
     index = hnswlib.Index(space='cosine', dim=dim)
     index.init_index(max_elements=n, ef_construction=EF_CONSTRUCTION, M=M_HNSW)
     index.add_items(features_norm, np.arange(n))
+    build_time = time.time() - t2
     index.set_ef(EF_SEARCH)
-    log(f"HNSW index built ({time.time()-t2:.1f}s)")
+    log(f"HNSW index built ({build_time:.3f}s)")
 
-    # --- Query ANN and measure recall@k ---
+    # === Query ANN and measure recall@k ===
     t3 = time.time()
     log("Querying ANN and measuring recall@k...")
     recall_results = {}
@@ -168,17 +169,15 @@ def main():
             "recall_pass": mean_recall >= r_floor,
         }
         status = "PASS" if mean_recall >= r_floor else "FAIL"
-        log(f"  recall@{k}: {mean_recall:.4f} (std={np.std(recalls):.4f}) — {status}")
+        log(f"  recall@{k}: {mean_recall:.4f} (std={np.std(recalls):.4f}) - {status}")
 
     log(f"ANN queries done ({time.time()-t3:.1f}s)")
 
-    # --- Verdict at k* ---
+    # === Verdict at k* ===
     k_star_recall = recall_results[K_STAR]["mean_recall"]
     k_star_pass = recall_results[K_STAR]["recall_pass"]
 
-    # Build time and query time
-    build_time = time.time() - t2
-    query_time_per_sample = (time.time() - t3) / n
+    query_time_per_sample = (time.time() - t3) / (n * len(K_GRID))
 
     log(f"\n{'='*60}")
     log(f"VERDICT: {'PASS' if k_star_pass else 'FAIL'}")
@@ -189,7 +188,7 @@ def main():
 
     metrics = {
         "run_id": "R-ANN",
-        "milestone": "HNSW index quality — recall@k vs exact kNN",
+        "milestone": "HNSW index quality - recall@k vs exact kNN",
         "gate": "G5/G6",
         "timestamp": time.strftime("%Y-%m-%dT%H:%M:%S"),
         "status": "COMPLETED",
@@ -226,23 +225,29 @@ def main():
                    "k_star": K_STAR, "k_grid": K_GRID,
                    "max_samples": MAX_SAMPLES}, f, default_flow_style=False)
 
-    # Also write ann.yaml config (referenced by experiment_plan §5)
-    ann_config = {
-        "M_HNSW": M_HNSW,
-        "ef_Search": EF_SEARCH,
-        "ef_Construction": EF_CONSTRUCTION,
-        "space": "cosine",
-        "k_star": K_STAR,
-    }
-    ann_path = EXP_DIR / "config" / "ann.yaml"
-    with open(ann_path, "w") as f:
-        yaml.dump(ann_config, f, default_flow_style=False)
-    log(f"\nOutputs: {OUT_DIR}/ + {ann_path}")
+    if write_config:
+        ann_config = {
+            "M_HNSW": M_HNSW,
+            "ef_Search": EF_SEARCH,
+            "ef_Construction": EF_CONSTRUCTION,
+            "space": "cosine",
+            "k_star": K_STAR,
+        }
+        ann_path = EXP_DIR / "configs" / "ann.yaml"
+        with open(ann_path, "w") as f:
+            yaml.dump(ann_config, f, default_flow_style=False)
+        log(f"\nOutputs: {OUT_DIR}/ + {ann_path}")
+    else:
+        log(f"\nOutputs: {OUT_DIR}/")
     return metrics
 
 
 if __name__ == "__main__":
-    m = main()
+    import argparse
+    ap = argparse.ArgumentParser(description="R-ANN: HNSW index recall and latency evaluation")
+    ap.add_argument("--write-config", action="store_true", help="Overwrite configs/ann.yaml")
+    args = ap.parse_args()
+    m = main(write_config=args.write_config)
     print(json.dumps({"run_id": m["run_id"], "verdict": m["verdict"],
                       "k_star_recall": m["k_star_recall"],
                       "r_floor": m["r_ANN_floor"]}, indent=2))

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""R-MASCOT-CMP: C1/C3 — Source-genealogy comparison on MASCOT source-code subset.
+"""R-MASCOT-CMP: C1/C3 - Source-genealogy comparison on MASCOT source-code subset.
 
-Experiment_plan §4: "source-genealogy comparison on source-code subset.
+evaluation design: "source-genealogy comparison on source-code subset.
 MalPhylo vs B3 (MASCOT) | lineage agreement on held-out (non-truth) edges".
 
 B3 (MASCOT genealogy) is the traditional tree-based approach: parent-child
@@ -10,11 +10,11 @@ edges (code-borrow, toolkit-share). This experiment tests whether:
   (a) MalPhylo agrees with B3 on vertical lineage (parent-child), AND
   (b) MalPhylo recovers cross-family edges that B3 misses (C1 contribution).
 
-Held-out protocol (§4.2.1 truth/baseline disentanglement):
-  Tier-G edges (3,139) are EXCLUDED from evaluation — they anchored truth.
+Held-out protocol (Section 3.5.1 truth/baseline disentanglement):
+  Tier-G edges (3,139) are EXCLUDED from evaluation - they anchored truth.
   Evaluation uses held-out specimen pairs NOT in Tier-G.
 
-NO ML TRAINING. Outputs: runs/R-MASCOT-CMP/{metrics.json, run.log, config.yaml}
+NO ML TRAINING. Outputs: results/R-MASCOT-CMP/{metrics.json, run.log, config.yaml}
 """
 from __future__ import annotations
 
@@ -31,8 +31,8 @@ import numpy as np
 import yaml
 
 HERE = Path(__file__).resolve().parent
-EXP_DIR = HERE.parent
-sys.path.insert(0, str(EXP_DIR / "src"))
+EXP_DIR = HERE.parent.parent
+sys.path.insert(0, str(EXP_DIR))
 
 from malphpylo.config import EdgeTypingConfig
 from malphpylo.edge_typing import lambda_decide, LAMBDA_SET, PARENT_CHILD, REJECT
@@ -47,9 +47,9 @@ from malphpylo.temporal import KappaKey, TAU_BOT
 import openpyxl
 
 MASCOT_DIR = EXP_DIR / "data" / "mascot-meta"
-GOLD_PATH = EXP_DIR / "runs" / "R-EDGETYPE-GOLD" / "tier_g.jsonl"
-THRESH_PATH = EXP_DIR / "config" / "thresholds.yaml"
-OUT_DIR = EXP_DIR / "runs" / "R-MASCOT-CMP"
+GOLD_PATH = EXP_DIR / "results" / "R-EDGETYPE-GOLD" / "tier_g.jsonl"
+THRESH_PATH = EXP_DIR / "configs" / "thresholds.yaml"
+OUT_DIR = EXP_DIR / "results" / "R-MASCOT-CMP"
 
 INDEX_GROUPS = ["imports", "string_entropy", "section_metadata"]
 BACKGROUND_GROUPS = ["opcode_ngrams", "byte_histogram", "cfg_topology"]

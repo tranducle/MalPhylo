@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """C3 quality-weighted fusion validation.
 
-Validates the Round-2 auto-improve C3 estimate by computing REAL quality-
+Validates C3 temporal ordering by computing real quality-
 weighted median fusion on the actual temporal signal data, then evaluating
 within-family triplet inconsistency.
 
-Round-2 estimate: near-pure string_markers (10:0.1:0.5:0) → 0.165
+Compare single-signal string_markers vs weighted fusion configurations
 This script computes the REAL number.
 
-REAL DATA ONLY — uses R-G1 features.jsonl + MalwareBazaar manifest.
+REAL DATA ONLY - uses R-G1 features.jsonl + MalwareBazaar manifest.
 NO FAKE DATA, NO ESTIMATES.
 """
 from __future__ import annotations
@@ -20,8 +20,9 @@ from typing import Dict, List, Optional
 import numpy as np
 
 HERE = Path(__file__).resolve().parent
-EXP_DIR = HERE.parent
-sys.path.insert(0, str(EXP_DIR / "src"))
+EXP_DIR = HERE.parent.parent
+sys.path.insert(0, str(EXP_DIR))
+sys.path.insert(0, str(EXP_DIR / "scripts" / "ablations"))
 
 # Reuse the temporal ablation infrastructure
 from run_g4_ablate_temp_real import (
@@ -29,7 +30,7 @@ from run_g4_ablate_temp_real import (
     TEMPORAL_SIGNALS, TS_MIN, TS_MAX
 )
 
-OUT_DIR = EXP_DIR / "runs" / "R-C3-QUALITY-WEIGHTED"
+OUT_DIR = EXP_DIR / "results" / "R-C3-QUALITY-WEIGHTED"
 SEEDS = [42, 43, 44, 45, 46]
 
 
@@ -116,7 +117,7 @@ def main():
     best_config = None
 
     for name, weights in weight_configs:
-        log(f"\n--- {name}: weights={weights} ---")
+        log(f"\n=== {name}: weights={weights} ===")
         temporal_vals = weighted_median_fusion(signals, samples, weights)
 
         n_valid = sum(1 for v in temporal_vals if v is not None)
@@ -148,7 +149,7 @@ def main():
             log(f"  ✅ NEW BEST!")
 
     # Also evaluate individual signals for reference
-    log(f"\n--- Individual signal references ---")
+    log(f"\n=== Individual signal references ===")
     for sig_name in TEMPORAL_SIGNALS:
         temporal_vals = [None] * len(samples)
         sig_vals = signals.get(sig_name, {})
@@ -176,8 +177,10 @@ def main():
     log(f"  Best inconsistency: {best_inconsist:.4f}")
     log(f"  Uniform baseline: {results['uniform']['inconsistency_mean']:.4f}")
     log(f"  Best single (string_markers): {results['single_string_markers']['inconsistency_mean']:.4f}")
-    log(f"  Beats uniform: {best_inconsist < results['uniform']['inconsistency_mean']}")
-    log(f"  Beats best single: {best_inconsist < results['single_string_markers']['inconsistency_mean']}")
+    beats_uni = round(best_inconsist, 4) < results["uniform"]["inconsistency_mean"]
+    beats_best_single = round(best_inconsist, 4) < results["single_string_markers"]["inconsistency_mean"]
+    log(f"  Beats uniform: {beats_uni}")
+    log(f"  Beats best single: {beats_best_single}")
     log(f"{'='*70}")
 
     metrics = {
@@ -189,8 +192,8 @@ def main():
         "results": results,
         "best_config": best_config,
         "best_inconsistency": round(best_inconsist, 4),
-        "beats_uniform": best_inconsist < results["uniform"]["inconsistency_mean"],
-        "beats_best_single": best_inconsist < results["single_string_markers"]["inconsistency_mean"],
+        "beats_uniform": beats_uni,
+        "beats_best_single": beats_best_single,
         "timing_seconds": round(time.time() - t0, 2),
     }
     (OUT_DIR / "metrics.json").write_text(json.dumps(metrics, indent=2, default=str))

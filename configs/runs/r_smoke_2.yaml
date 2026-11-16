@@ -1,10 +1,10 @@
-# R-SMOKE-2 — MalTree NJ baseline reproduction (B1) on Zenodo fused embeddings, 5K subset.
+# R-SMOKE-2 - MalTree NJ baseline reproduction (B1) on Zenodo fused embeddings, 5K subset.
 # Sanity run, pre-G2 (gates G2). NO ML TRAINING.
 run_id: R-SMOKE-2
 baseline: B1_maltree_NJ
-output_dir: runs
+output_dir: results
 
-# Data (manual fetch — see data/maltree/MANUAL_DOWNLOAD.md)
+# Data (manual fetch - see data/README.md)
 embeddings_path: data/maltree/embeddings_fused.json
 dim_expect: null        # accept whatever dimension MalTree released; logged in metrics.json
 
@@ -13,7 +13,7 @@ subset_size: 5000
 seed: 20260628
 
 # Distance + rooting
-distance: cosine        # matches experiment_plan §5 (B8 control uses the same cosine on these embeddings)
+distance: cosine        # matches HNSW/baseline specification (B8 control uses the same cosine on these embeddings)
 midpoint_root: true     # outgroup-free; VT first-seen τ not in the embedding JSON
 
 # Published-range target (informational; the temporal-consistency metric proper needs VT τ,

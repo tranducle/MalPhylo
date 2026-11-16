@@ -13,7 +13,7 @@ Signals (4 REAL):
   3. string_markers: date strings from binary
   4. code_reuse_order: import subset ordering proxy
 
-Outputs: runs/R-ABLATE-TEMP-LOO-REAL/{metrics.json, run.log, config.yaml}
+Outputs: results/R-ABLATE-TEMP-LOO-REAL/{metrics.json, run.log, config.yaml}
 """
 from __future__ import annotations
 
@@ -26,13 +26,13 @@ import numpy as np
 import yaml
 
 HERE = Path(__file__).resolve().parent
-EXP_DIR = HERE.parent
-sys.path.insert(0, str(EXP_DIR / "src"))
+EXP_DIR = HERE.parent.parent
+sys.path.insert(0, str(EXP_DIR))
 
-RG1_PATH = EXP_DIR / "runs" / "R-G1" / "features.jsonl"
+RG1_PATH = EXP_DIR / "results" / "R-G1" / "features.jsonl"
 MANIFEST_PATH = EXP_DIR / "data" / "malwarebazaar" / "manifest.jsonl"
-THRESH_PATH = EXP_DIR / "config" / "thresholds.yaml"
-OUT_DIR = EXP_DIR / "runs" / "R-ABLATE-TEMP-LOO-REAL"
+THRESH_PATH = EXP_DIR / "configs" / "thresholds.yaml"
+OUT_DIR = EXP_DIR / "results" / "R-ABLATE-TEMP-LOO-REAL"
 
 N_RUNS = 5
 TS_MIN = 946684800
@@ -222,7 +222,7 @@ def main():
     run_results = []
     for run_idx in range(N_RUNS):
         seed = 42 + run_idx
-        log(f"\n--- Run {run_idx+1}/{N_RUNS} (seed={seed}) ---")
+        log(f"\n=== Run {run_idx+1}/{N_RUNS} (seed={seed}) ===")
 
         # Full multi-signal: median of available signals per sample
         full_temporal = []
@@ -258,7 +258,7 @@ def main():
                 "survives": delta >= delta_sig_floor,
             }
             status = "SURVIVES" if delta >= delta_sig_floor else "Below floor"
-            log(f"  Drop {drop_sig}: inc={inc_without:.4f}, Δ={delta:+.2f}% — {status}")
+            log(f"  Drop {drop_sig}: inc={inc_without:.4f}, Δ={delta:+.2f}% - {status}")
 
         n_surviving = sum(1 for v in loo_results.values() if v["survives"])
         
@@ -286,7 +286,7 @@ def main():
     log(f"\n{'='*70}")
     log(f"STABILITY CHECK ({N_RUNS} runs)")
     log(f"  All PASS: {all_pass}")
-    log(f"  C3 Δ: mean={np.mean(c3_deltas):.2f}%, std={c3_std:.2f} — {c3_deltas}")
+    log(f"  C3 Δ: mean={np.mean(c3_deltas):.2f}%, std={c3_std:.2f} - {c3_deltas}")
     log(f"  Surviving: {surviving}")
     log(f"  Stable: {stable}")
     final = "PASS (STABLE)" if all_pass and stable else ("STABLE but FAIL" if stable else "UNSTABLE")

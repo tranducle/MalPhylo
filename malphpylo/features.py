@@ -1,15 +1,15 @@
-"""Feature extractor φ (§3.1) — interpretable binary features via static analysis.
+"""Feature extractor φ (Section 3.3) - interpretable binary features via static analysis.
 
-Six feature groups (per methodology §3.1):
-  1. opcode_ngrams   — top-K opcode 2/3-gram distributions (normalized)
-  2. cfg_topology    — per-function CFG stats aggregated to sample percentiles
-  3. imports         — normalized import/export symbol sets (Jaccard)
-  4. string_entropy  — printable-string Shannon entropies + rare-string set
-  5. section_metadata— per-section name/entropy/vsize/rsize/characteristics
-  6. byte_histogram  — EMBER-style 256-bin byte + entropy histograms
+Six feature groups (per Section 3.3):
+  1. opcode_ngrams   - top-K opcode 2/3-gram distributions (normalized)
+  2. cfg_topology    - per-function CFG stats aggregated to sample percentiles
+  3. imports         - normalized import/export symbol sets (Jaccard)
+  4. string_entropy  - printable-string Shannon entropies + rare-string set
+  5. section_metadata -  per-section name/entropy/vsize/rsize/characteristics
+  6. byte_histogram  - EMBER-style 256-bin byte + entropy histograms
 
-Packing handling (§3.2): detect packers; mark affected groups *untrusted*
-(down-weight, never discard). NO dynamic execution (Decision 5 + safety).
+Packing handling (Section 3.3): detect packers; mark affected groups *untrusted*
+(down-weight, never discard). NO dynamic execution (static analysis only).
 """
 from __future__ import annotations
 
@@ -26,9 +26,9 @@ import numpy as np
 from .config import PackingConfig
 
 
-# ---------------------------------------------------------------------------
-# Feature containers — one per group, each carrying a `trusted` flag (§3.2)
-# ---------------------------------------------------------------------------
+# ===========================================================================
+# Feature containers - one per group, each carrying a `trusted` flag (Section 3.3)
+# ===========================================================================
 
 @dataclass
 class OpcodeNgramFeatures:
@@ -69,10 +69,10 @@ class ByteHistogramFeatures:
 
 @dataclass
 class SampleFeatures:
-    """Full feature vector φ(s) for one sample (§3.1)."""
+    """Full feature vector φ(s) for one sample (Section 3.3)."""
     sample_id: str
     family: Optional[str]
-    sha256: str                      # h(v) for leaf vertices (§2.4)
+    sha256: str                      # h(v) for leaf vertices (Section 3.2)
     platform: str
     opcode_ngrams: OpcodeNgramFeatures
     cfg_topology: CFGTopologyFeatures
@@ -80,12 +80,12 @@ class SampleFeatures:
     string_entropy: StringEntropyFeatures
     section_metadata: SectionMetadataFeatures
     byte_histogram: ByteHistogramFeatures
-    # raw temporal signals (§4.3) extracted here for the temporal module
+    # raw temporal signals (Section 5.4) extracted here for the temporal module
     temporal_signals: Dict[str, Optional[float]] = field(default_factory=dict)
-    packed: bool = False             # packing detection result (§3.2)
+    packed: bool = False             # packing detection result (Section 3.3)
 
     def trusted_groups(self) -> Set[str]:
-        """G_tr membership test (§3.2): which groups are trusted for this sample."""
+        """G_tr membership test (Section 3.3): which groups are trusted for this sample."""
         groups: Set[str] = set()
         if self.opcode_ngrams.trusted: groups.add("opcode_ngrams")
         if self.cfg_topology.trusted: groups.add("cfg_topology")
@@ -96,9 +96,9 @@ class SampleFeatures:
         return groups
 
 
-# ---------------------------------------------------------------------------
+# ===========================================================================
 # Helpers
-# ---------------------------------------------------------------------------
+# ===========================================================================
 
 _SHANNON_LOG2 = math.log2
 
@@ -128,9 +128,9 @@ def _sha256_bytes(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
-# ---------------------------------------------------------------------------
-# Byte + entropy histograms (EMBER-style) — robust, always trusted
-# ---------------------------------------------------------------------------
+# ===========================================================================
+# Byte + entropy histograms (EMBER-style) - robust, always trusted
+# ===========================================================================
 
 def _extract_byte_histogram(data: bytes) -> ByteHistogramFeatures:
     counts = np.zeros(256, dtype=np.float64)
@@ -161,14 +161,14 @@ def _extract_byte_histogram(data: bytes) -> ByteHistogramFeatures:
     return ByteHistogramFeatures(byte_hist=byte_hist, entropy_hist=ent_bins)
 
 
-# ---------------------------------------------------------------------------
-# Packing detection (§3.2)
-# ---------------------------------------------------------------------------
+# ===========================================================================
+# Packing detection (Section 3.3)
+# ===========================================================================
 
 def detect_packing(section_features: SectionMetadataFeatures,
                    byte_features: ByteHistogramFeatures,
                    cfg: PackingConfig) -> Tuple[bool, str]:
-    """Detect packing via section entropy + known signatures (§3.2).
+    """Detect packing via section entropy + known signatures (Section 3.3).
 
     Returns (is_packed, reason). Packed sections trigger trust-renormalization:
     affected feature groups are marked *untrusted* (down-weighted, not discarded).
@@ -182,18 +182,17 @@ def detect_packing(section_features: SectionMetadataFeatures,
     for sig in cfg.known_packer_signatures:
         if sig.upper() in name_blob:
             return True, f"signature:{sig}"
-    # global byte entropy below minimum code entropy => suspect
-    if byte_features.entropy_hist.size > 0:
-        # rough global entropy proxy: weighted mean of entropy-histogram centers
-        centers = np.arange(16) * 0.5
-        glob = float(np.average(centers, weights=byte_features.entropy_hist + 1e-12))
-        if glob > 0 and glob < cfg.min_code_entropy and len(section_features.sections) <= 3:
-            return True, f"low_global_entropy:{glob:.2f}"
+    # High global entropy across sliding windows indicates packed/encrypted payload
+    if byte_features.entropy_hist.size > 0 and np.any(byte_features.entropy_hist > 0):
+        centers = np.arange(16) * 0.5 + 0.25
+        glob = float(np.average(centers, weights=byte_features.entropy_hist))
+        if glob >= cfg.section_entropy_threshold:
+            return True, f"high_global_entropy:{glob:.2f}"
     return False, ""
 
 
 def apply_packing_trust(features: SampleFeatures, reason: str) -> None:
-    """§3.2: mark packing-affected groups untrusted (down-weight, never discard).
+    """Section 3.3: mark packing-affected groups untrusted (down-weight, never discard).
 
     CFG topology and opcode n-grams are most affected by packing (obfuscated
     control flow + encrypted code). Byte histogram and section metadata remain
@@ -205,9 +204,9 @@ def apply_packing_trust(features: SampleFeatures, reason: str) -> None:
     features.opcode_ngrams.trusted = False
 
 
-# ---------------------------------------------------------------------------
+# ===========================================================================
 # Synthetic / file-backed extraction
-# ---------------------------------------------------------------------------
+# ===========================================================================
 
 def extract_features_from_bytes(data: bytes,
                                 sample_id: str,
@@ -249,7 +248,7 @@ def extract_features_from_bytes(data: bytes,
     for i in range(0, len(data) - 1, 2):
         bigrams[(data[i], data[i + 1])] += 1
     top = bigrams.most_common(64)
-    # most_common returns [((a, b), count), ...] — key is the bigram tuple
+    # most_common returns [((a, b), count), ...] - key is the bigram tuple
     vocab = tuple(f"bg_{ka}_{kb}" for (ka, kb), _ in top) if top else tuple()
     if top:
         dist = np.array([c for (_, c) in top], dtype=np.float64)
@@ -257,7 +256,7 @@ def extract_features_from_bytes(data: bytes,
     else:
         dist = np.zeros(0, dtype=np.float64)
 
-    # section metadata: fallback — treat whole file as one ".raw" section
+    # section metadata: fallback - treat whole file as one ".raw" section
     section_byte_counts = [Counter(data[i:i + 65536]) for i in range(0, len(data), 65536)]
     sections = []
     for i, sc in enumerate(section_byte_counts[:8]):
@@ -271,8 +270,8 @@ def extract_features_from_bytes(data: bytes,
         })
 
     section_features = SectionMetadataFeatures(sections=sections)
-    opcode_features = OpcodeNgramFeatures(distribution=dist, vocab=vocab)
-    cfg_features = CFGTopologyFeatures(percentiles=np.zeros(5), n_functions=0)
+    opcode_features = OpcodeNgramFeatures(distribution=dist, vocab=vocab, trusted=bool(dist.size > 0))
+    cfg_features = CFGTopologyFeatures(percentiles=np.zeros(5), n_functions=0, trusted=False)
     import_features = ImportFeatures(symbol_set=frozenset())
     string_features = StringEntropyFeatures(
         entropy_distribution=ent_hist, rare_string_set=frozenset(rare_strings)
@@ -285,7 +284,7 @@ def extract_features_from_bytes(data: bytes,
         section_metadata=section_features, byte_histogram=byte_features,
     )
 
-    # packing detection + trust renormalization (§3.2)
+    # packing detection + trust renormalization (Section 3.3)
     packed, reason = detect_packing(section_features, byte_features, packing_cfg)
     if packed:
         apply_packing_trust(sample, reason)
@@ -297,14 +296,23 @@ def extract_pe_features(path: str | Path,
                         sample_id: str,
                         family: Optional[str],
                         packing_cfg: PackingConfig) -> SampleFeatures:
-    """Extract φ(s) from a Win32 PE file via pefile/lief (Decision 5: static only).
+    """Extract static phi(s) from a Win32 PE file on disk via pefile."""
+    return extract_pe_features_from_bytes(
+        Path(path).read_bytes(), sample_id, family, packing_cfg
+    )
 
-    Extracts: PE timestamp (§4.3 signal 1), imports, sections, byte histograms,
-    printable strings. Falls back to byte-path if parsing fails (logged).
+
+def extract_pe_features_from_bytes(data: bytes,
+                                   sample_id: str,
+                                   family: Optional[str],
+                                   packing_cfg: PackingConfig) -> SampleFeatures:
+    """Extract static phi(s) in memory from raw Win32 PE bytes via pefile.
+
+    Extracts PE timestamp, imports, sections, byte/entropy histograms, and
+    printable strings without writing raw executables to disk. Unextracted
+    disassembly groups (opcode_ngrams, cfg_topology) remain marked untrusted.
     """
     import pefile  # local import: optional dependency
-
-    data = Path(path).read_bytes()
     sha = _sha256_bytes(data)
     byte_features = _extract_byte_histogram(data)
 
@@ -314,7 +322,7 @@ def extract_pe_features(path: str | Path,
 
     try:
         pe = pefile.PE(data=data, fast_load=True)
-        # PE timestamp (§4.3 signal 1) — spoofable, cross-checked later
+        # PE timestamp (Section 5.4 signal 1) - spoofable, cross-checked later
         if hasattr(pe, "FILE_HEADER") and pe.FILE_HEADER.TimeDateStamp:
             pe_ts = float(pe.FILE_HEADER.TimeDateStamp)
         # sections
@@ -365,9 +373,9 @@ def extract_pe_features(path: str | Path,
         entropy_distribution=ent_hist, rare_string_set=frozenset(rare_strings)
     )
 
-    # opcode n-grams + CFG: full disassembly deferred to lief at scale; smoke uses fallback
-    opcode_features = OpcodeNgramFeatures(distribution=np.zeros(0), vocab=tuple())
-    cfg_features = CFGTopologyFeatures(percentiles=np.zeros(5), n_functions=0)
+    # Disassembly-dependent modalities are not extracted here and remain untrusted
+    opcode_features = OpcodeNgramFeatures(distribution=np.zeros(0), vocab=tuple(), trusted=False)
+    cfg_features = CFGTopologyFeatures(percentiles=np.zeros(5), n_functions=0, trusted=False)
 
     sample = SampleFeatures(
         sample_id=sample_id, family=family, sha256=sha, platform="win32_pe",
@@ -388,7 +396,7 @@ def extract_apk_features(path: str | Path,
                          sample_id: str,
                          family: Optional[str],
                          packing_cfg: PackingConfig) -> SampleFeatures:
-    """Extract φ(s) from an Android APK via androguard (Decision 5: static only)."""
+    """Extract φ(s) from an Android APK via androguard (static analysis only)."""
     data = Path(path).read_bytes()
     sha = _sha256_bytes(data)
     byte_features = _extract_byte_histogram(data)
@@ -432,8 +440,8 @@ def extract_apk_features(path: str | Path,
     string_features = StringEntropyFeatures(
         entropy_distribution=ent_hist, rare_string_set=frozenset(rare_strings)
     )
-    opcode_features = OpcodeNgramFeatures(distribution=np.zeros(0), vocab=tuple())
-    cfg_features = CFGTopologyFeatures(percentiles=np.zeros(5), n_functions=0)
+    opcode_features = OpcodeNgramFeatures(distribution=np.zeros(0), vocab=tuple(), trusted=False)
+    cfg_features = CFGTopologyFeatures(percentiles=np.zeros(5), n_functions=0, trusted=False)
 
     sample = SampleFeatures(
         sample_id=sample_id, family=family, sha256=sha, platform="android",

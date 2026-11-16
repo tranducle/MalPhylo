@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 """R-EDGETYPE-REAL-OPT: C2 threshold optimization loop.
 
-Resolves CONTRADICTIONS_REPORT D2 (optimize the honest C2 metric, not the
+Evaluates and tunes C2 edge-typing on balanced real-PE pairs (without
 tautological F1=1.0). The current real-PE macro-F1 = 0.557 is dragged down
 by the `convergent` class (F1=0.24, recall 0.11). This script grid-searches
 the lambda_decide + fallback thresholds to maximise macro-F1 over 5 seeds,
 stopping after 5 consecutive non-improving parameter sets.
 
-NO ML TRAINING — only threshold grid search on a disjoint calibration split
-(methodology §4.2 "Calibration without a negatives problem").
+NO ML TRAINING - only threshold grid search on a disjoint calibration split
+(Section 3.5 "Calibration without a negatives problem").
 
-Outputs -> runs/R-EDGETYPE-REAL-OPT/{metrics.json, optimization_trace.json, run.log}
+Outputs -> results/R-EDGETYPE-REAL-OPT/{metrics.json, optimization_trace.json, run.log}
 """
 from __future__ import annotations
 
@@ -22,8 +22,8 @@ import numpy as np
 import yaml
 
 HERE = Path(__file__).resolve().parent
-EXP_DIR = HERE.parent
-sys.path.insert(0, str(EXP_DIR / "src"))
+EXP_DIR = HERE.parent.parent
+sys.path.insert(0, str(EXP_DIR))
 sys.setrecursionlimit(50000)
 
 from malphpylo.config import EdgeTypingConfig
@@ -32,9 +32,9 @@ from malphpylo.features import *
 from malphpylo.similarity import pairwise_similarity
 from malphpylo.temporal import KappaKey
 
-RG1_PATH = EXP_DIR / "runs" / "R-G1" / "features.jsonl"
-THRESH_PATH = EXP_DIR / "config" / "thresholds.yaml"
-OUT_DIR = EXP_DIR / "runs" / "R-EDGETYPE-REAL-OPT"
+RG1_PATH = EXP_DIR / "results" / "R-G1" / "features.jsonl"
+THRESH_PATH = EXP_DIR / "configs" / "thresholds.yaml"
+OUT_DIR = EXP_DIR / "results" / "R-EDGETYPE-REAL-OPT"
 
 ALPHA = {"opcode_ngrams": 0.20, "cfg_topology": 0.15, "imports": 0.20,
          "string_entropy": 0.15, "section_metadata": 0.10, "byte_histogram": 0.20}
@@ -46,8 +46,18 @@ N_RUNS = 5
 N_PER_CLASS = 75
 
 
-# ---- Reuse the v3 loaders / gold-builder / F1 (identical protocol) ----
-from run_g4_edgetype_real import load_good_samples, make_feat, build_balanced_gold, compute_f1  # noqa: E402
+# === Reuse the v3 loaders / gold-builder / F1 (identical protocol) ===
+sys.path.insert(0, str(EXP_DIR / "scripts" / "experiments"))
+try:
+    from run_g4_edgetype_real import (  # noqa: E402
+        load_good_samples, make_feat, build_balanced_gold, compute_f1, CFG_REAL,
+    )
+except ModuleNotFoundError as exc:
+    raise ModuleNotFoundError(
+        "Unbundled upstream helper 'run_g4_edgetype_real.py' is not included in "
+        "this public release snapshot; see REPRODUCIBILITY.md and archived metrics in "
+        "results/R-EDGETYPE-REAL-OPT/."
+    ) from exc
 
 
 def classify_with_cfg(sa, sb, cfg: EdgeTypingConfig,
@@ -181,7 +191,7 @@ def main():
         print(line, flush=True); log_lines.append(line)
 
     log("=" * 70)
-    log("R-EDGETYPE-REAL-OPT: C2 threshold optimization (D2 fix)")
+    log("R-EDGETYPE-REAL-OPT: C2 threshold optimization")
     log("=" * 70)
     t0 = time.time()
 
@@ -195,7 +205,6 @@ def main():
     log(f"Good PE samples: {len(samples)}")
 
     # Baseline (current v3 config) for comparison
-    from run_g4_edgetype_real import CFG_REAL
     baseline = evaluate_params(samples, CFG_REAL, 3, 5, 1.0, [42, 43, 44, 45, 46])
     log(f"Baseline (v3): F1={baseline['f1_mean']} ± {baseline['f1_std']}, "
         f"per-class={baseline['per_class_f1_mean']}")
@@ -217,7 +226,7 @@ def main():
     metrics = {
         "run_id": "R-EDGETYPE-REAL-OPT",
         "gate": "G3",
-        "milestone": "C2 threshold optimization (D2 fix)",
+        "milestone": "C2 threshold optimization",
         "timestamp": time.strftime("%Y-%m-%dT%H:%M:%S"),
         "status": "COMPLETED",
         "baseline_v3": baseline,
@@ -234,7 +243,7 @@ def main():
         "verdict": "PASS" if (f1_pass and rb_pass) else "FAIL",
         "thresholds": {"F_min": F_min, "rb_C2_floor": rb_floor},
         "reconciliation_note": (
-            "This run OPTIMIZES the honest real-PE C2 metric (D2). The "
+            "This run OPTIMIZES the honest real-PE C2 metric. The "
             "tautological R-EDGETYPE (F1=1.0) is NOT reported as C2; it is "
             "retained only as a rule-taxonomy consistency diagnostic."
         ),

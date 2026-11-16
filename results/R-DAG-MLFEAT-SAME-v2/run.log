@@ -1,39 +1,39 @@
 [11:15:36] ======================================================================
 [11:15:36] R-DAG-MLFEAT-SAME: No-ML same-corpus comparison (PCA proxy, 5 runs)
 [11:15:36] ======================================================================
-[11:15:36] Loaded 2074 samples (D3 fix: 12 families, >=100 each), 317 dimensions
+[11:15:36] Loaded 2074 samples ( 12 families, >=100 each), 317 dimensions
 [11:15:36] Families: 12 ({'Formbook': 414, 'AgentTesla': 339, 'AsyncRAT': 246, 'NjRAT': 120, 'PrivateLoader': 120}...)
 [11:15:36] After zero-variance filter: 309 dims
 [11:15:38] 
---- Run 1/5 (seed=42) ---
+=== Run 1/5 (seed=42) ===
 [11:15:38]   MalPhylo cf_rate: 0.4554 (30221/66368)
 [11:15:38]   PCA-ML cf_rate:   0.4674 (31021/66368)
 [11:15:38]   Δ(MalPhylo - PCA-ML): -0.0121
 [11:15:38]   Non-inferior (Δ ≥ -0.1): True
 [11:15:38]   Verdict: NON-INFERIOR
 [11:15:38] 
---- Run 2/5 (seed=43) ---
+=== Run 2/5 (seed=43) ===
 [11:15:38]   MalPhylo cf_rate: 0.4554 (30221/66368)
 [11:15:38]   PCA-ML cf_rate:   0.4673 (31015/66368)
 [11:15:38]   Δ(MalPhylo - PCA-ML): -0.0120
 [11:15:38]   Non-inferior (Δ ≥ -0.1): True
 [11:15:38]   Verdict: NON-INFERIOR
 [11:15:38] 
---- Run 3/5 (seed=44) ---
+=== Run 3/5 (seed=44) ===
 [11:15:38]   MalPhylo cf_rate: 0.4554 (30221/66368)
 [11:15:38]   PCA-ML cf_rate:   0.4677 (31037/66368)
 [11:15:38]   Δ(MalPhylo - PCA-ML): -0.0123
 [11:15:38]   Non-inferior (Δ ≥ -0.1): True
 [11:15:38]   Verdict: NON-INFERIOR
 [11:15:38] 
---- Run 4/5 (seed=45) ---
+=== Run 4/5 (seed=45) ===
 [11:15:38]   MalPhylo cf_rate: 0.4554 (30221/66368)
 [11:15:38]   PCA-ML cf_rate:   0.4675 (31024/66368)
 [11:15:38]   Δ(MalPhylo - PCA-ML): -0.0121
 [11:15:38]   Non-inferior (Δ ≥ -0.1): True
 [11:15:38]   Verdict: NON-INFERIOR
 [11:15:38] 
---- Run 5/5 (seed=46) ---
+=== Run 5/5 (seed=46) ===
 [11:15:38]   MalPhylo cf_rate: 0.4554 (30221/66368)
 [11:15:38]   PCA-ML cf_rate:   0.4679 (31053/66368)
 [11:15:38]   Δ(MalPhylo - PCA-ML): -0.0125
@@ -43,7 +43,7 @@
 ======================================================================
 [11:15:38] STABILITY CHECK (5 runs)
 [11:15:38]   All NON-INFERIOR: True
-[11:15:38]   Δ: mean=-0.0122, std=0.0002 — [-0.0121, -0.012, -0.0123, -0.0121, -0.0125]
+[11:15:38]   Δ: mean=-0.0122, std=0.0002 - [-0.0121, -0.012, -0.0123, -0.0121, -0.0125]
 [11:15:38]   Stable (std<0.02): True
 [11:15:38]   Final: NON-INFERIOR (STABLE)
 [11:15:38] ======================================================================

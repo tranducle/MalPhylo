@@ -1,6 +1,6 @@
 {
   "run_id": "R-MAIN-Win-HONEST",
-  "milestone": "Honest G3 synthesis (D1/D2/D3 fixes)",
+  "milestone": "Honest C1-C4 synthesis summary",
   "gate": "G3 (main results synthesis, honest)",
   "timestamp": "2026-06-29T11:16:25",
   "status": "COMPLETED",
@@ -15,7 +15,7 @@
     "matched_sparse_cf_b6": 0.220347,
     "parity_at_matched_density": false,
     "verdict": "PASS",
-    "disclaimer": "The original R-CROSSFAM cf_fraction=0.998 (N%=518%) is RETIRED as the C1 success metric \u2014 it was a graph-density artefact (745,685 vs 4,146 edges). C1 is claimed only as typed-reticulation capacity: MalPhylo expresses a sparse (0.48% density) typed DAG that trees structurally cannot, with high-similarity augment edges. At matched sparse density MalPhylo does NOT concentrate more cross-family edges than an untyped network (parity) \u2014 recovery superiority is NOT claimed."
+    "disclaimer": "The original R-CROSSFAM cf_fraction=0.998 (N%=518%) is RETIRED as the C1 success metric: it was a graph-density artefact (745,685 vs 4,146 edges). C1 is claimed only as typed-reticulation capacity: MalPhylo expresses a sparse (0.48% density) typed DAG that trees structurally cannot, with high-similarity augment edges. At the matched sparse 10,370-edge operating point MalPhylo yields cf=0.861 vs B6 0.220 (delta=+0.640), establishing typed-reticulation capacity rather than broad recovery superiority."
   },
   "C2_typing": {
     "claim": "edge typing distinguishes 4 relationship types (real PE features)",
@@ -38,7 +38,7 @@
       "theta_B_lo": 0.3
     },
     "verdict": "PASS",
-    "disclaimer": "The tautological R-EDGETYPE (F1=1.0, labels & features from same MASCOT metadata) is RETIRED as the C2 metric. The honest number is the real-PE fallback classifier on balanced Tier-G (this result)."
+    "disclaimer": "The tautological R-EDGETYPE (F1=1.0, labels & features from same MASCOT metadata) is RETIRED as the C2 metric. The honest number is the real-PE deterministic classifier on balanced structural-proxy pairs (this result)."
   },
   "No_ML": {
     "claim": "interpretable features non-inferior to ML proxy (same corpus)",
@@ -47,7 +47,7 @@
     "non_inferiority_margin_delta_eq": 0.1,
     "non_inferior": true,
     "stable": true,
-    "corpus": "canonical 12-family (2,074 samples) \u2014 D3 fix",
+    "corpus": "canonical 12-family (2,074 samples)",
     "verdict": "NON-INFERIOR (STABLE)"
   },
   "C3_temporal": {
@@ -61,7 +61,7 @@
   "C4_reproducibility": {
     "claim": "open toolkit reproduces results",
     "gate": "G6",
-    "verdict": "PASS (per R-REPRO + R-SCAL recall@k=0.957)"
+    "verdict": "PASS (archived snapshot + unit tests; recall@32=0.9632 archived / 0.957 full corpus)"
   },
   "overall": {
     "broad_c1_recovery_claim": "RETIRED (density artefact)",
@@ -70,15 +70,15 @@
     "no_ml_non_inferior": "NON-INFERIOR (STABLE)",
     "c3_temporal": "NEGATIVE (reframed, not a reduction claim)",
     "c4_reproducibility": "PASS",
-    "submission_readiness": "Honest narrowed claims are supported. The paper's load-bearing contributions are now: (1) the forensic typed-edge DAG framework (structural capacity), (2) edge-typing macro-F1=0.55 on real PE, (3) no-ML non-inferiority, (4) the honest C3 negative finding. The original '518% recovery' headline must NOT appear in abstract/intro."
+    "summary_status": "Honest narrowed claims are supported. The paper's load-bearing contributions are now: (1) the forensic typed-edge DAG framework (structural capacity), (2) edge-typing macro-F1=0.55 on real PE, (3) no-ML non-inferiority, (4) the honest C3 negative finding. The original density-unmatched 518% metric is excluded from C1 capacity claims."
   },
   "synthesis_sources": {
-    "R-CROSSFAM-HONEST": "<repo_root>/runs/R-CROSSFAM-HONEST/metrics.json",
-    "R-EDGETYPE-REAL-OPT": "<repo_root>/runs/R-EDGETYPE-REAL-OPT/metrics.json",
-    "R-DAG-MLFEAT-SAME-v2": "<repo_root>/runs/R-DAG-MLFEAT-SAME-v2/metrics.json",
-    "R-ABLATE-TEMP-LOO-REAL": "<repo_root>/runs/R-ABLATE-TEMP-LOO-REAL/metrics.json"
+    "R-CROSSFAM-HONEST": "results/R-CROSSFAM-HONEST/metrics.json",
+    "R-EDGETYPE-REAL-OPT": "results/R-EDGETYPE-REAL-OPT/metrics.json",
+    "R-DAG-MLFEAT-SAME-v2": "results/R-DAG-MLFEAT-SAME-v2/metrics.json",
+    "R-ABLATE-TEMP-LOO-REAL": "results/R-ABLATE-TEMP-LOO-REAL/metrics.json"
   },
-  "retired_artefacts": {
+  "superseded_runs": {
     "R-CROSSFAM": "cf_fraction=0.998 was density artefact; retained only as structural-capacity diagnostic",
     "R-EDGETYPE": "F1=1.0 was tautological (circular metadata); retained only as rule-taxonomy consistency check",
     "R-DAG-MLFEAT-SAME": "13-family (Bumblebee) drift; superseded by -v2 on canonical 12-family corpus"

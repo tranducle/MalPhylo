@@ -2,168 +2,90 @@
 
 **A Typed-Edge DAG Framework for Malware Phylogeny from Interpretable Binary Features**
 
-> 📌 **Anonymous artifact** — prepared for double-blind review. No author, affiliation, or
-> personal-identifying information is included in this repository. For the anonymized
-> submission mirror, see the `anonymous.4open.science` link in the paper.
+> **Anonymous research artifact** prepared for double-blind peer review. Author names, affiliations, and personal identifiers are omitted from repository files. No raw malware binaries or third-party datasets are redistributed.
 
-MalPhylo reconstructs malware phylogeny as a typed-edge directed acyclic graph (DAG)
-$G=(V,E,\tau,w,\lambda)$ over interpretable static binary features. Each edge carries one
-of four forensic relationship labels — **parent-child**, **code-borrow**, **toolkit-share**,
-or **convergent** — assigned by a deterministic, training-free $\lambda$-decide classifier.
+MalPhylo models malware evolution as a typed-edge directed acyclic graph $G=(V,E,\tau,w,\lambda)$ built from static Win32 PE binary features across interpretable feature groups (`imports`, `string_entropy`, `section_metadata`, `byte_histogram`, plus packing-masked disassembly modalities). Every cross-family candidate edge receives one of four forensic relationship labels (**parent-child**, **code-borrow**, **toolkit-share**, or **convergent**) from a deterministic, rule-based $\lambda$-decide classifier without gradient-based training or learned neural embeddings.
 
-**Key property:** no gradient-based training, no learned embeddings. Auditability is a
-first-class design objective.
+## Headline Evaluation Summary
 
----
+Values below summarize the current manuscript evaluation alongside the archived baseline/ablation runs under `results/`. See [`REPRODUCIBILITY.md`](REPRODUCIBILITY.md) for the exact correspondence between archived JSON artifacts and external extended runs.
 
-## 📊 Headline Results
+| Claim | Metric | Manuscript Result | Baseline / Reference |
+| :- | :- | :- | :- |
+| **C1** Typed reticulation capacity | Cross-family fraction $cf$ at `10,370` edges (`2,074` PE samples) | **`0.861`** (mean augment sim `0.997`) | `0.220` (untyped `B6` at matched budget) |
+| **C2** Edge-type classification | Held-out 4-class macro-F1 (`5` seeds, `300` PE structural-proxy edges/seed) | **`0.556 +/- 0.005`** (`rb = 0.361`) | `0.100` (majority class `B5`) |
+| **C2** Refinement upper estimate | Post-hoc rule refinement (non-headline upper estimate) | `0.647 +/- 0.015` (`rb = 0.413`) | Threshold-opt snapshot: `0.5516` (`results/R-EDGETYPE-REAL-OPT/`) |
+| **Training-free (`B8`)** | Top-`32` cross-family neighbor rate vs same-corpus PCA proxy (`2,074` PE samples) | `0.455` vs `0.468`, **`Delta = -0.012`** | Non-inferior within `delta_eq = 0.10` (`results/R-DAG-MLFEAT-SAME-v2/`) |
+| **C3** Temporal alignment | Within-family triplet inconsistency (`3,002` PE corpus) | `0.21` (`string_markers`) vs `0.30` quality-weighted (honest negative) | `0.39` uniform median; `0.43` `first_seen` |
+| **C4** Scalability & tests | HNSW `recall@32` / latency (`3,002` PE) + regression suite | **`0.957 @ 0.06 ms/query`** (`0.13 s` build); **`24` unit tests** (vs `14`-test paper baseline) | `>= 0.95` floor (`2,000`-sample snapshot `0.9632` in `results/R-ANN/`) |
 
-| Claim | Metric | Value | Baseline |
-|---|---|---|---|
-| **C1** Typed reticulation capacity | cross-family fraction $cf$ @ 10,370 edges | **0.861** | 0.220 (untyped B6) |
-| **C2** Edge-type classification | macro-F1 (Tier-G, 5 seeds) | **0.647 ± 0.015** | 0.100 (majority) |
-| **No-ML** Interpretable vs ML proxy | $\Delta$ cross-family rate | **−0.012** (within $\delta_{eq}=0.10$) | PCA proxy |
-| **C3** Temporal alignment | triplet inconsistency (string markers) | **0.21** (best single signal) | 0.30 (best fusion) |
-| **C4** Scalability | HNSW recall@32 / query time | **0.957 @ 0.06 ms** | ≥ 0.95 floor |
+**Key scope boundaries reported in the paper:**
 
-Full metrics for every run are under [`results/`](results/).
+- **C1 structural capacity:** Broad cross-family recovery superiority is not claimed; `C1` establishes sparse typed-reticulation capacity (`2,073` MST skeleton + `8,297` augment edges, density `0.48%`). A cross-family near-duplicate audit of `41,003` pairs with similarity `>= 0.99` found `0` exact SHA-256 duplicates, `435` (`1.1%`) near-duplicates, and `31` suspicious pairs.
+- **C2 ground-truth separation:** Held-out PE classification is evaluated on balanced real-PE structural-proxy pairs (`75` per class per seed). The MASCOT source-code Tier-G ledger (`3,139` provenance edges + `43,150` Tier-S candidates across `6,031` processed specimens in `results/R-EDGETYPE-GOLD/`) is reported separately.
+- **C3 negative finding:** Naive unweighted multi-signal temporal fusion (`0.39` inconsistency) underperforms the sparse `string_markers` signal (`0.21` overall across `1,036/3,002` samples; `0.196 +/- 0.003` on the `503`-sample common-availability subset). Hierarchical fallback (`kappa`) prefers `string_markers` and falls back to `first_seen` when string markers are absent.
 
----
-
-## 📁 Repository Structure
+## Repository Structure
 
 ```
 MalPhylo/
-├── malphpylo/                  # Core package (training-free)
-│   ├── config.py               # YAML config schema + validation
-│   ├── features.py             # φ extractor: 6 feature groups + packing detection
-│   ├── similarity.py           # Trust-renormalized weighted similarity
-│   ├── temporal.py             # κ total order + multi-signal τ
-│   ├── edge_typing.py          # λ-decide 5-rule deterministic classifier
-│   ├── dag.py                  # DAG construction: MST + augment + V_I + Kahn
-│   ├── maltree_nj.py           # Neighbor-joining / UPGMA baselines
-│   ├── pipeline.py             # End-to-end runner
-│   ├── logging_utils.py        # Structured JSON logs + evidence ledger
-│   ├── __main__.py             # CLI entry point
-│   └── __init__.py
-├── scripts/                    # Experiment runners, organized by stage
-│   ├── data_acquisition/       # Fetch MalwareBazaar / temporal archives
-│   ├── features/               # G1 feature extraction
-│   ├── baselines/              # B1/B2/B4/B6/B7 trees, MST, networks, kNN
-│   ├── experiments/            # Official C1–C4 + No-ML runners (paper versions)
-│   ├── ablations/              # k-sensitivity, temporal-LOO
-│   ├── calibration/            # λ-decide threshold calibration (20% split)
-│   └── gold_set/               # Tier-G provenance-anchored label construction
-├── configs/                    # ann.yaml, thresholds.yaml, run configs
-├── tests/                      # Formal-property unit tests
-├── results/                    # metrics.json + run.log per run (no raw outputs)
-├── data/                       # Dataset download guide (data not vendored)
+├── malphpylo/                  # Core training-free package (features, similarity, kappa, DAG, lambda-decide)
+├── scripts/
+│   ├── data_acquisition/       # MalwareBazaar API and daily archive fetch scripts
+│   ├── features/               # In-memory static Win32 PE feature extraction (G1)
+│   ├── baselines/              # Neighbor joining, UPGMA, NeighborNet/median-joining, kNN, MST skeleton
+│   ├── ablations/              # k-sensitivity (A8) and leave-one-out temporal ablations (A9, C3)
+│   ├── calibration/            # Pre-registered threshold calibration (20% split)
+│   ├── experiments/            # C1-C4, B3 MASCOT, B8 PCA control, HNSW retrieval, synthesis scripts
+│   └── gold_set/               # MASCOT Tier-G provenance ledger construction
+├── configs/                    # ann.yaml, thresholds.yaml, and configs/runs/ YAMLs
+├── tests/                      # Formal-property and core-invariant regression unit tests
+├── results/                    # Archived metrics.json and run.log snapshots per RUN_ID
+├── data/                       # Documentation only (see DATA.md for corpus setup)
+├── DATA.md                     # Upstream datasets, credentials setup, and corpus documentation
+├── REPRODUCIBILITY.md          # Environment, offline checks, and snapshot artifact mapping
+├── RELEASE_SHA256.txt          # SHA-256 checksum manifest of tracked release files
 ├── requirements.txt
 ├── environment.yml
-└── .env.example                # API-key template (real keys NEVER committed)
+└── .env.example                # MalwareBazaar key template (real .env is gitignored)
 ```
 
----
-
-## 📥 Datasets
-
-MalPhylo consumes **raw Win32 PE binaries**; pre-extracted feature datasets cannot run the
-$\phi$ extractor. Three public sources are used:
-
-| Dataset | Role | Source |
-|---|---|---|
-| **MalwareBazaar** (abuse.ch) | Primary raw Win32 PE corpus (2,074 main + 928 background = 3,002) | https://bazaar.abuse.ch/ — API: https://mb-api.abuse.ch/api/v1/ |
-| **MalTree embeddings** | Tree baselines (B1/B2) + No-ML PCA proxy (B8) | https://zenodo.org/records/20261117 |
-| **MASCOT** | Source-code genealogy → Tier-G provenance anchor + B3 reference | https://huggingface.co/datasets/Bojing94/MASCOT |
-
-See [`data/README.md`](data/README.md) for exact download steps, licensing, and the
-"infected" ZIP password convention.
-
----
-
-## ⚙️ Installation
+## Quick Start (Offline Checks)
 
 ```bash
-git clone <this-repo-url> MalPhylo
-cd MalPhylo
-
-# Option A: pip
 pip install -r requirements.txt
 
-# Option B: conda (recommended — pins Python 3.11)
-conda env create -f environment.yml
-conda activate malphpylo
+# 1. Run formal-property and invariant unit tests (24 tests)
+python -m pytest tests/ -v
+
+# 2. Run the synthetic end-to-end smoke pipeline
+python -m malphpylo run configs/runs/r_smoke_1.yaml
 ```
 
-**No GPU required.** All experiments run CPU-only. The reported HNSW query time
-(0.06 ms/query) was measured on a workstation with an AMD Ryzen 7 5800X, 128 GB RAM, and
-an NVIDIA RTX 3090 (the GPU was present but unused by MalPhylo's training-free pipeline).
+No GPU is required. All stages run on CPU only. Baseline MalTree configs (`configs/runs/r_smoke_2.yaml` and `configs/runs/r_g2.yaml`) are invoked via `python -m malphpylo.maltree_nj configs/runs/r_smoke_2.yaml` and `python scripts/baselines/run_g2_baselines.py` (defaults to `configs/runs/r_g2.yaml`). See [`DATA.md`](DATA.md) for dataset acquisition and [`REPRODUCIBILITY.md`](REPRODUCIBILITY.md) for full experimental reproduction details.
 
----
+## Methodology Mapping (Code to Manuscript)
 
-## 🚀 Reproducing the Paper's Results
+| Module | Manuscript Section |
+| :- | :- |
+| `malphpylo/temporal.py` (`kappa` order and acyclicity) | Section 3.2 Temporal Order and Acyclicity |
+| `malphpylo/features.py` (`phi`, static groups, packing detection) | Section 3.3 Interpretable Feature Vector |
+| `malphpylo/similarity.py` (trust renormalization) | Section 3.3 and Appendix A.2 Trust Renormalization |
+| `malphpylo/dag.py` (MST + cross-family augment + `V_I` + Kahn check) | Section 3.4 DAG Construction |
+| `malphpylo/edge_typing.py` (`lambda`-decide rule classifier) | Section 3.5 Edge Typing via lambda-Decide |
+| `tests/test_formal_properties.py` | Appendix A Formal Notes on Acyclicity and Similarity |
 
-```bash
-# 1. Acquire data (requires a free MalwareBazaar Auth-Key — see data/README.md)
-cp .env.example .env   # then edit .env and paste your key
-PYTHONPATH=. python scripts/data_acquisition/fetch_targeted_families.py
+## Security and Privacy Notes
 
-# 2. Extract features (G1)
-PYTHONPATH=. python scripts/features/run_g1_features.py
+- **No secrets or credentials** are included. Set `MALWAREBAZAAR_AUTH_KEY` only inside a local `.env` file (gitignored).
+- **No raw malware binaries** are committed or redistributed. Samples processed during `G1` are extracted in memory from ZIP archives and parsed statically via `pefile` (`extract_pe_features_from_bytes`) without writing raw executables to disk.
+- All scripts operate purely via static analysis and deterministic graph/statistical routines.
 
-# 3. Calibrate thresholds on a disjoint 20% split (600 / 3,002 samples)
-PYTHONPATH=. python scripts/calibration/calibrate_thresholds.py
+## License and Citation
 
-# 4. Run the four claim experiments
-PYTHONPATH=. python scripts/experiments/run_g3_crossfam_honest.py    # C1
-PYTHONPATH=. python scripts/experiments/run_g4_edgetype_real_opt.py  # C2
-PYTHONPATH=. python scripts/experiments/run_c3_quality_weighted.py   # C3
-PYTHONPATH=. python scripts/experiments/run_g5_ann.py                # C4
+Released under the **MIT License** (see [`LICENSE`](LICENSE)).
 
-# 5. No-ML control (C1 structural metric vs PCA proxy)
-PYTHONPATH=. python scripts/experiments/run_g3_dag_mlfeat_same.py
-
-# 6. Verify formal properties (acyclicity, similarity symmetry/bounds/no-imputation)
-PYTHONPATH=. pytest tests/ -v
-```
-
-Every reported number in the paper maps to a `results/<RUN_ID>/metrics.json` artifact;
-`results/<RUN_ID>/run.log` records the exact command, seed, and corpus snapshot.
-
----
-
-## 🔬 Methodology Mapping (code → paper)
-
-| Module | Paper section |
-|---|---|
-| `malphpylo/features.py` (φ, 6 groups, packing) | §3.3 Interpretable Features + Trust Renormalization |
-| `malphpylo/similarity.py` | §3.3, Proposition 1 (symmetry / bounds / no-imputation) |
-| `malphpylo/temporal.py` (κ) | §3.2 Temporal Order and Acyclicity |
-| `malphpylo/dag.py` (MST + augment + Kahn) | §3.4 DAG Construction |
-| `malphpylo/edge_typing.py` (λ-decide) | §3.5 Edge Typing via λ-Decide |
-| `tests/test_formal_properties.py` | Appendix, Formal Notes on Acyclicity |
-
----
-
-## 🔒 Privacy & Security Notes
-
-- **No API keys, credentials, or personal data** are committed. The MalwareBazaar Auth-Key
-  is read from a local `.env` file (gitignored); copy `.env.example` to `.env` and supply
-  your own key.
-- **No raw malware binaries** are vendored. Samples are fetched on demand from MalwareBazaar
-  as password-protected ZIPs (`"infected"` is the standard abuse.ch password, not a secret).
-- Sample SHA-256 hashes appearing in `results/*.json` are public MalwareBazaar identifiers.
-
----
-
-## 📜 License
-
-Released under the **MIT License** — see [`LICENSE`](LICENSE). Academic use encouraged.
-
-## 📖 Citation
-
-For double-blind review, cite the anonymous version referenced in the submitted paper.
-A non-anonymous `CITATION.bib` will be provided upon acceptance.
+For double-blind review, cite the anonymous artifact referenced in the submission:
 
 ```bibtex
 @misc{malphylo2026anonymous,

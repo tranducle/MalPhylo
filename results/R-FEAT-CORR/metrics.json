@@ -16,7 +16,7 @@
     "p_value": 0.0071,
     "n_objects": 7,
     "n_permutations": 5040,
-    "script": "mantel_test.py",
+    "script": "exact Mantel permutation helper (5040 permutations over 7x7 similarity matrix)",
     "rationale": "Correct test for correlated similarity matrices; respects pairwise non-independence and resolves pseudoreplication inconsistency with the family-level resampling design"
   },
   "kendall_tau": 0.52381,
@@ -73,13 +73,13 @@
     "total_s": 39.17
   },
   "artifacts": {
-    "scatter_data_csv": "<repo_root>/runs/R-FEAT-CORR/scatter_data.csv"
+    "scatter_data_csv": "results/R-FEAT-CORR/scatter_data.csv"
   },
   "limitations": [
-    "Only 7 paired samples (21 pairs) \u2014 far below the recommended \u2265100 pairs for a reliable correlation",
+    "Only 7 paired samples (21 pairs) - far below the recommended \u2265100 pairs for a reliable correlation",
     "Cross-corpus overlap is only 28 SHA256s between MalwareBazaar (9961) and MalTree (102322), of which 7 have MalPhylo features available",
     "If \u03c1 is insignificant, this may be due to small sample size rather than a true lack of correlation",
     "Recommendation for manuscript: acquire a larger overlapping corpus or run a same-corpus H2 test on MalTree's own raw samples (if available)"
   ],
-  "interpretation": "Spearman \u03c1=0.6519 (p=0.0014) on 21 pairs. PASS: \u03c1 \u2265 \u03c1_min (0.30) \u2014 interpretable features correlate with ML embeddings."
+  "interpretation": "Spearman \u03c1=0.6519 (p=0.0014) on 21 pairs. PASS: \u03c1 \u2265 \u03c1_min (0.30) - interpretable features correlate with ML embeddings."
 }

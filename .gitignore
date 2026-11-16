@@ -1,4 +1,4 @@
-# Secrets — NEVER commit
+# Secrets - NEVER commit
 .env
 .env.*
 !.env.example
@@ -15,7 +15,7 @@ __pycache__/
 .idea/
 .vscode/
 
-# Data — download on demand, never vendored (keep docs only)
+# Data - download on demand, never vendored (keep docs only)
 data/malwarebazaar/samples/
 data/malwarebazaar/*.jsonl
 data/maltree/*.json
@@ -23,7 +23,7 @@ data/maltree/*.json.*
 data/mascot-meta/
 !data/README.md
 
-# Large run outputs — keep only metrics.json + run.log (already in results/)
+# Large run outputs - keep only metrics.json + run.log (already in results/)
 results/**/*.npy
 results/**/*.jsonl
 results/**/*.graphml

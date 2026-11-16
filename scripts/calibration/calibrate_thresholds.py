@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 """Calibration split: fix all thresholds a priori before unblinding evaluation.
 
-Resolves StatisticalAnalyst BLOCK 1 (thresholds.yaml missing), BLOCK 3 (power
-analysis), and BLOCK 4 (δ_eq unregistered).
+Pre-registered calibration protocol fixing thresholds, power analysis, and the non-inferiority margin delta_eq.
 
-Procedure (methodology §4.5, experiment_plan §3):
+Procedure (Section 4.2, calibration protocol):
   1. Split R-G1 features into calibration (20%, seed-fixed) and evaluation (80%).
   2. On the calibration split:
      a. Compute pairwise similarities → cross-family recovery baseline (B7 kNN)
@@ -13,12 +12,12 @@ Procedure (methodology §4.5, experiment_plan §3):
      d. Compute bootstrap CI width → δ_eq (non-inferiority margin)
      e. Compute cluster-bootstrap effective n and power
   3. Fix thresholds from calibration statistics + standard effect-size conventions.
-  4. Write config/thresholds.yaml with all pre-registered values + justification.
+  4. Write configs/thresholds.yaml with all pre-registered values + justification.
 
 NO ML TRAINING. All computations are deterministic graph/statistical algorithms.
 
 Usage:
-  PYTHONPATH=src python3 scripts/calibrate_thresholds.py
+  python3 scripts/calibration/calibrate_thresholds.py
 """
 from __future__ import annotations
 
@@ -34,13 +33,13 @@ import numpy as np
 import yaml
 
 HERE = Path(__file__).resolve().parent
-EXP_DIR = HERE.parent
-sys.path.insert(0, str(EXP_DIR / "src"))
+EXP_DIR = HERE.parent.parent
+sys.path.insert(0, str(EXP_DIR))
 
 from malphpylo.maltree_nj import load_embeddings, cosine_distance_matrix
 
-RUNS_DIR = EXP_DIR / "runs"
-CONFIG_DIR = EXP_DIR / "config"
+RUNS_DIR = EXP_DIR / "results"
+CONFIG_DIR = EXP_DIR / "configs"
 R_G1_PATH = RUNS_DIR / "R-G1" / "features.jsonl"
 TIER_G_PATH = RUNS_DIR / "R-EDGETYPE-GOLD" / "tier_g.jsonl"
 EMBEDDINGS_PATH = EXP_DIR / "data" / "maltree" / "embeddings_fused.json"
@@ -136,7 +135,7 @@ def compute_spearman_vs_embeddings(
     - maltree_dist: cosine distance from MalTree embeddings
     Then Spearman ρ = -correlation(our_sim, maltree_dist).
     """
-    # Load MalTree embeddings (slow — only load SHAs we need)
+    # Load MalTree embeddings (slow - only load SHAs we need)
     cal_shas = {f["sha256"] for f in cal_features}
     sha_to_feat = {f["sha256"]: f for f in cal_features}
 
@@ -260,7 +259,7 @@ def compute_power_analysis(n_families: int, effect_size: float = 0.33, alpha: fl
             power = max(0.0, min(1.0, power))
             results[f"n={n_fam}_delta={es}"] = round(power, 3)
 
-    # Current state — compute directly for the actual n_families
+    # Current state - compute directly for the actual n_families
     z_alpha = 1.645
     z_H1_cur = effect_size * math.sqrt(n_families) / math.sqrt(2.0 / 3.0)
     current_power = float(0.5 * (1.0 + math.erf((z_H1_cur - z_alpha) / math.sqrt(2.0))))
@@ -390,7 +389,7 @@ def main():
     log(f"  calibration families (≥10): {n_families_cal}")
     log(f"  evaluation families (≥50): {n_families_eval}")
 
-    # --- Compute calibration statistics ---
+    # === Compute calibration statistics ===
 
     # 1. Majority-class F1 (B5 baseline)
     log("Computing majority-class F1 (B5 baseline)...")
@@ -437,7 +436,7 @@ def main():
     log(f"  Current power (n={n_current}, δ=0.33): {power['current_power']:.1%}")
     log(f"  Min n for 80% power: {power['min_n_for_80pct_power']}")
 
-    # --- Fix thresholds ---
+    # === Fix thresholds ===
     # N%: minimum improvement over B1/B2. Use 5% as a conservative floor
     # (B7 kNN cross-family fraction is 0.2849; a 5% absolute improvement = 0.3349)
     N_pct = 5.0
@@ -456,7 +455,7 @@ def main():
     # Δ_sig_floor: per-signal marginal value. Use 2% (small but detectable)
     Delta_sig_floor = 2.0
 
-    # Effect-size floors — adjusted based on power analysis
+    # Effect-size floors - adjusted based on power analysis
     # Cliff's δ: 0.33 = small-medium, 0.50 = medium, 0.66 = large
     # Power at n=13: δ=0.33→42.6%, δ=0.50→71.3%, δ=0.66→89.8%
     # Use δ=0.50 for C1 (adequate power at n=13, medium effect)

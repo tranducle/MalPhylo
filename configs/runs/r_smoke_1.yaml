@@ -1,15 +1,15 @@
-# MalPhylo R-SMOKE-1 — sanity run (experiment_plan.md §4)
+# MalPhylo R-SMOKE-1 - sanity run (pipeline specification (Section 3.4))
 # Goal: pipeline end-to-end on 1K samples; completes, no crash.
 # Gate: pre-G2 (smoke). Status: pending -> COMPLETE after run.
 run_id: "R-SMOKE-1"
 run_type: "smoke"
 dataset_path: "synthetic"      # synthetic corpus for smoke test
 platform: "win32_pe"
-sample_limit: 1000             # 1K samples per experiment_plan.md
-output_dir: "runs"
+sample_limit: 1000             # 1K samples default smoke limit
+output_dir: "results"
 seed: 42
 
-# Feature weights alpha (§3.3): sum = 1, fixed a priori, ablated (G4)
+# Feature weights alpha (Section 3.3): sum = 1, fixed a priori, ablated (G4)
 feature_weights:
   opcode_ngrams: 0.20
   cfg_topology: 0.15
@@ -26,11 +26,11 @@ features:
     - string_entropy
     - section_metadata
     - byte_histogram
-  index_groups:        # I (§4.2): imports, string-entropy, section-metadata
+  index_groups:        # I (Section 3.5): imports, string-entropy, section-metadata
     - imports
     - string_entropy
     - section_metadata
-  background_groups:   # B (§4.2): opcodes, byte/entropy histograms, CFG
+  background_groups:   # B (Section 3.5): opcodes, byte/entropy histograms, CFG
     - opcode_ngrams
     - byte_histogram
     - cfg_topology

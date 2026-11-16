@@ -1,6 +1,6 @@
 """Structured JSON logging + evidence-ledger emission.
 
-Per experiment_plan.md §5: structured JSON logs; per-stage checkpointing;
+Per pipeline configuration schema: structured JSON logs; per-stage checkpointing;
 output artifacts include metrics.json, run.log, evidence ledgers (JSONL).
 """
 from __future__ import annotations
@@ -13,7 +13,7 @@ from typing import Any, Dict, Optional
 
 
 class EvidenceLedger:
-    """Append-only JSONL evidence ledger (§4.4 auditable evidence chain)."""
+    """Append-only JSONL evidence ledger (Section 3.6 auditable evidence chain)."""
 
     def __init__(self, path: str | Path) -> None:
         self.path = Path(path)

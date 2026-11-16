@@ -48,7 +48,7 @@
       "mst_max_weight": 0.803974,
       "proximity_threshold": 1.205962,
       "note": "Simplified median-joining approximation (Python). For publication-quality NeighborNet, import the NEXUS file in SplitsTree4.",
-      "nexus_file": "runs/R-G2/b6_nexus.nex",
+      "nexus_file": "results/R-G2/b6_nexus.nex",
       "nexus_size_kb": 134978,
       "seconds": 85.21
     },
@@ -78,10 +78,10 @@
     "load_seconds": 32.02
   },
   "artifacts": {
-    "b2_upgma_tree": "runs/R-G2/b2_upgma_tree.newick",
-    "b6_nexus": "runs/R-G2/b6_nexus.nex",
-    "b6_median_joining": "runs/R-G2/b6_median_joining.gml",
-    "b7_knn_graph": "runs/R-G2/b7_knn_graph.gexf"
+    "b2_upgma_tree": "results/R-G2/b2_upgma_tree.newick",
+    "b6_nexus": "results/R-G2/b6_nexus.nex",
+    "b6_median_joining": "results/R-G2/b6_median_joining.gml",
+    "b7_knn_graph": "results/R-G2/b7_knn_graph.gexf"
   },
   "g2_checks": {
     "B2_cherry_purity_gt_random": true,

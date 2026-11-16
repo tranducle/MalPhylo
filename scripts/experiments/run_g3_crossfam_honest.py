@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """R-CROSSFAM-HONEST: Density-matched C1 evaluation + theta optimization loop.
 
-Resolves CONTRADICTIONS_REPORT D1. The original R-CROSSFAM compared cf_fraction
+Evaluates density-matched C1 capacity with FPR control against B6.
 across graphs whose edge counts differ by 35x-360x (745,685 vs 4,146 edges),
 which is a density artefact. This script:
 
@@ -9,18 +9,18 @@ which is a density artefact. This script:
   2. Defines the HONEST C1 metric: cf_fraction at a COMMON edge budget B
      (= B6's edge count, the densest baseline), computed by keeping each
      method's top-B highest-similarity edges. This removes the density
-     confound — every method gets the same edge "budget" to express
+     confound - every method gets the same edge "budget" to express
      cross-family structure.
-  3. Implements the methodology §4.2 N_null FPR control: the false-positive
+  3. Implements the Section 3.5 N_null FPR control: the false-positive
      rate is measured against intra-family pairs whose code-reuse signal is
      absent (N_null), NOT a label-shuffle permutation.
   4. Runs a theta_min grid-search optimization loop with 5-consecutive-
      non-improvement stopping (per user instruction). The objective is to
      maximise MalPhylo's density-matched cf_fraction subject to FPR <= 5%.
 
-NO ML TRAINING (methodology §0/§3; experiment_plan §0).
+NO ML TRAINING (Sections 3.1-3.5; evaluation protocol).
 
-Outputs -> runs/R-CROSSFAM-HONEST/{metrics.json, optimization_trace.json, run.log}
+Outputs -> results/R-CROSSFAM-HONEST/{metrics.json, optimization_trace.json, run.log}
 """
 from __future__ import annotations
 
@@ -39,30 +39,38 @@ import scipy.cluster.hierarchy as sch
 from scipy.spatial.distance import squareform
 
 HERE = Path(__file__).resolve().parent
-EXP_DIR = HERE.parent
-sys.path.insert(0, str(EXP_DIR / "src"))
+EXP_DIR = HERE.parent.parent
+sys.path.insert(0, str(EXP_DIR))
 sys.setrecursionlimit(50000)
 
 # Reuse the original script's loaders/builders to guarantee the ONLY change
 # is the metric (density matching + FPR control), not the pipeline.
-from run_g3_crossfam import (  # noqa: E402
-    deserialize_features, compute_similarity_matrix, build_b6_network,
-    DEFAULT_FEATURE_WEIGHTS, DEFAULT_FEATURES_CFG, DEFAULT_PACKING_CFG,
-    DEFAULT_TEMPORAL_CFG, DEFAULT_EDGE_TYPING_CFG, DEFAULT_MST_CFG,
-    neighbor_joining, _majority_family, _majority_family_set,
-    NJNode,
-)
+sys.path.insert(0, str(EXP_DIR / "scripts" / "experiments"))
+try:
+    from run_g3_crossfam import (  # noqa: E402
+        deserialize_features, compute_similarity_matrix, build_b6_network,
+        DEFAULT_FEATURE_WEIGHTS, DEFAULT_FEATURES_CFG, DEFAULT_PACKING_CFG,
+        DEFAULT_TEMPORAL_CFG, DEFAULT_EDGE_TYPING_CFG, DEFAULT_MST_CFG,
+        neighbor_joining, _majority_family, _majority_family_set,
+        NJNode,
+    )
+except ModuleNotFoundError as exc:
+    raise ModuleNotFoundError(
+        "Unbundled upstream helper 'run_g3_crossfam.py' is not included in this "
+        "public release snapshot; see REPRODUCIBILITY.md and archived metrics in "
+        "results/R-CROSSFAM-HONEST/."
+    ) from exc
 from malphpylo.config import RunConfig  # noqa: E402
 
-OUT_DIR = EXP_DIR / "runs" / "R-CROSSFAM-HONEST"
-FEATURES_PATH = EXP_DIR / "runs" / "R-G1" / "features.jsonl"
-THRESHOLDS_PATH = EXP_DIR / "config" / "thresholds.yaml"
-SIM_CACHE = EXP_DIR / "runs" / "R-CROSSFAM-HONEST" / "sim_matrix.npy"
+OUT_DIR = EXP_DIR / "results" / "R-CROSSFAM-HONEST"
+FEATURES_PATH = EXP_DIR / "results" / "R-G1" / "features.jsonl"
+THRESHOLDS_PATH = EXP_DIR / "configs" / "thresholds.yaml"
+SIM_CACHE = EXP_DIR / "results" / "R-CROSSFAM-HONEST" / "sim_matrix.npy"
 
 
-# --------------------------------------------------------------------------- #
+# ===========================================================================
 # Density-matched cf_fraction (the honest metric)
-# --------------------------------------------------------------------------- #
+# ===========================================================================
 def density_matched_cf_fraction(
     S: np.ndarray, families_list: List[str], budget: int
 ) -> Dict[str, Any]:
@@ -203,10 +211,10 @@ def dag_cf_at_budget(
 def null_fpr_against_nnull(
     S: np.ndarray, families_list: List[str], theta_min: float
 ) -> Dict[str, Any]:
-    """Methodology §4.2 N_null FPR control.
+    """Section 3.5 null class N_null FPR control.
 
     N_null = intra-family pairs (same family) whose code-reuse signal is
-    absent — i.e. the false-positive class for cross-family edge admission.
+    absent - i.e. the false-positive class for cross-family edge admission.
     FPR = fraction of admitted edges that fall in N_null (should-be-rejected
     intra-family pairs that crossed the theta_min threshold). A genuine
     cross-family detector keeps this <= alpha (5%).
@@ -234,9 +242,9 @@ def null_fpr_against_nnull(
     }
 
 
-# --------------------------------------------------------------------------- #
+# ===========================================================================
 # Theta optimization loop (5-consecutive-non-improvement stopping)
-# --------------------------------------------------------------------------- #
+# ===========================================================================
 def sparse_operating_eval(
     S: np.ndarray, families_list: List[str], theta_min: float,
     density_cap_multiplier: int = 5,
@@ -273,7 +281,7 @@ def sparse_operating_eval(
     mean_sim = float(np.mean([c[0] for c in chosen])) if chosen else 0.0
 
     # Cross-family precision among chosen augment (all are CF by construction,
-    # so this is 1.0 — reported for transparency, NOT as a comparison metric).
+    # so this is 1.0 - reported for transparency, NOT as a comparison metric).
     # The honest comparison metric is mean_similarity at matched sparse budget
     # vs an untyped method picking the same number of global top-k pairs.
     global_topk = []
@@ -350,9 +358,9 @@ def optimize_theta(
             "final_streak": non_improve_streak}
 
 
-# --------------------------------------------------------------------------- #
+# ===========================================================================
 # Main
-# --------------------------------------------------------------------------- #
+# ===========================================================================
 def run() -> Dict[str, Any]:
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     log_lines: List[str] = []
@@ -362,7 +370,7 @@ def run() -> Dict[str, Any]:
         print(line, flush=True)
         log_lines.append(line)
 
-    log("=== R-CROSSFAM-HONEST START (D1 fix) ===")
+    log("=== R-CROSSFAM-HONEST START ===")
     t0 = time.time()
 
     with open(THRESHOLDS_PATH) as f:
@@ -403,14 +411,14 @@ def run() -> Dict[str, Any]:
     names = [s.sample_id for s in samples]
     families = {s.sample_id: s.family for s in samples}
 
-    # ---- Baselines at their NATURAL structure (for reference) ----
+    # === Baselines at their NATURAL structure (for reference) ===
     log("Building baselines (B1 NJ, B2 UPGMA, B6 network)...")
     nj_root = neighbor_joining(names, D)
     b6_graph, b6_stats = build_b6_network(names, D, families, k=10)
     b6_n_edges = b6_stats["n_edges"]
     log(f"B6 edge count (the matched budget) = {b6_n_edges}")
 
-    # ---- THE HONEST METRIC: density-matched cf_fraction at B6's budget ----
+    # === THE HONEST METRIC: density-matched cf_fraction at B6's budget ===
     budget = b6_n_edges
     log(f"=== Density-matched comparison @ budget={budget} edges ===")
 
@@ -424,8 +432,8 @@ def run() -> Dict[str, Any]:
     log(f"B6@budget cf_frac={b6_matched['cf_fraction']}")
     log(f"B4(MST,n-1) cf_frac={b4_natural['cf_fraction']}")
 
-    # ---- Theta optimization loop (sparse-density objective) ----
-    # Grid from very strict (0.95) down — ascending so the loop climbs mean-sim
+    # === Theta optimization loop (sparse-density objective) ===
+    # Grid from very strict (0.95) down - ascending so the loop climbs mean-sim
     # until it plateaus (5 consecutive non-improvements).
     theta_grid = [0.60, 0.65, 0.70, 0.72, 0.74, 0.76, 0.78, 0.80,
                   0.82, 0.84, 0.86, 0.88, 0.90, 0.92, 0.94, 0.96]
@@ -440,8 +448,8 @@ def run() -> Dict[str, Any]:
         f"density={best_eval['graph_density'] if best_eval else 'n/a'}, "
         f"stopped_early={opt['stopped_early']}")
 
-    # ---- Honest head-to-head at MATCHED sparse budget ----
-    # CRITICAL FIX (Session 24 review G3): the previous version called the SAME
+    # === Honest head-to-head at MATCHED sparse budget ===
+    # Match the base evaluation metric and FPR-controlled pair pruning:
     # density_matched_cf_fraction() for both MalPhylo and B6 with identical args,
     # which compared a number to itself (cf parity 0.220347 was an artefact of
     # that self-comparison). The honest comparison must use the METHODS' ACTUAL
@@ -464,7 +472,7 @@ def run() -> Dict[str, Any]:
 
     # Data-driven interpretation: describe whatever the numbers actually show,
     # never a hardcoded direction (a prior version asserted "LOWER" while the
-    # computed delta was +0.64 — a self-contradiction). The C1 *claim* is
+    # computed delta was +0.64 - a self-contradiction). The C1 *claim* is
     # capacity-not-superiority regardless of sign, so the prose adapts to delta.
     if delta_cf > 0.05:
         _direction = (
@@ -509,11 +517,11 @@ def run() -> Dict[str, Any]:
         f"{malphpylo_cf['cf_fraction']}, B6 cf={b6_cf['cf_fraction']}, "
         f"delta={delta_cf:.4f}")
 
-    # ---- G2 diagnostic: why is the theta-sweep degenerate? ----
+    # === G2 diagnostic: why is the theta-sweep degenerate? ===
     # Count cross-family candidate pairs above each theta to show whether the
     # sparsity cap (5n) binds before the theta filter. Also report the mean
     # similarity of ALL cross-family pairs (if ~1.0, similarity may be driven
-    # by packer/compiler uniformity rather than genuine code relatedness — a
+    # by packer/compiler uniformity rather than genuine code relatedness - a
     # construct-validity caveat for the limitations section).
     iu = np.triu_indices(n, k=1)
     all_sims = S[iu]
@@ -537,7 +545,7 @@ def run() -> Dict[str, Any]:
             "measured similarity may reflect shared packer/compiler environment "
             "rather than genuine code relatedness; this is reported as a "
             "limitation and mitigated by the trust-renormalization of packed "
-            "sections (methodology §3.2)."
+            "sections (Section 3.3)."
         ),
         "theta_discrimination": theta_diag,
     }
@@ -547,7 +555,7 @@ def run() -> Dict[str, Any]:
     log(f"  CF pairs above theta=0.60: {theta_diag[3]['n_cf_pairs_above']} "
         f"(cap 5n={5*n} {'binds' if theta_diag[3]['cap_binds'] else 'ok'})")
 
-    # ---- Honest verdict ----
+    # === Honest verdict ===
     # C1 is reframed: NOT "recovers more cross-family edges" (unsupported at
     # matched density), but "represents typed reticulate evolution a tree
     # structurally cannot, with sparse, high-similarity augment edges that
@@ -561,7 +569,7 @@ def run() -> Dict[str, Any]:
     metrics = {
         "run_id": "R-CROSSFAM-HONEST",
         "gate": "G3",
-        "milestone": "C1 density-matched honest re-evaluation (D1 fix)",
+        "milestone": "C1 density-matched honest re-evaluation",
         "timestamp": time.strftime("%Y-%m-%dT%H:%M:%S"),
         "status": "COMPLETED",
         "corpus": {"n_samples": n, "n_families": len(valid),
@@ -570,7 +578,7 @@ def run() -> Dict[str, Any]:
             "name": "density_matched_cf_fraction",
             "budget": budget,
             "budget_basis": "B6 untyped-network edge count (densest baseline)",
-            "fpr_control": "methodology §4.2 N_null (intra-family pairs w/o code-reuse)",
+            "fpr_control": "Section 3.5 N_null (intra-family pairs w/o code-reuse)",
             "fpr_alpha": 0.05,
             "rationale": "Original R-CROSSFAM cf_fraction was a density artefact "
                          "(745,685 vs 4,146 edges). This metric compares every method "
@@ -611,14 +619,14 @@ def run() -> Dict[str, Any]:
             "similarity >=0.5. C1 is claimed as typed-reticulation CAPACITY "
             "(structural), NOT recovery superiority."
             if honest_pass else
-            "No valid sparse operating point — original cf_fraction=0.998 was a "
+            "No valid sparse operating point - original cf_fraction=0.998 was a "
             "density artefact and C1 must be heavily narrowed."
         ),
         "reconciliation_note": (
             "This run REPLACES the cf_fraction comparison in R-CROSSFAM/R-MAIN-Win "
             "for the C1 claim. The original R-CROSSFAM cf_fraction=0.998 is retained "
             "only as a structural-representation-capacity diagnostic, NOT as the C1 "
-            "success metric (per CONTRADICTIONS_REPORT D1)."
+            "success metric."
         ),
         "timing_seconds": round(time.time() - t0, 2),
     }

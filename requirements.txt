@@ -1,19 +1,21 @@
-# MalPhylo — Reproducible environment
-# Python 3.11 | Training-free (graph algorithms + statistics only)
+# MalPhylo: Reproducible CPU-only environment
+# Python 3.11+ | Training-free (graph algorithms + statistics only)
 
 # Core graph / numerical
 networkx>=3.2,<4.0
 scipy>=1.11,<2.0
 numpy>=1.24,<2.0
-scikit-learn>=1.3,<2.0      # metrics/baseline ONLY — never for training
+scikit-learn>=1.3,<2.0      # evaluation metrics / PCA baseline ONLY (no neural training)
 pyyaml>=6.0
+hnswlib>=0.8                # HNSW approximate nearest-neighbor retrieval (C4)
 
-# PE / Android static analysis (static only, no dynamic execution)
-lief>=0.14                   # PE/ELF parsing, robust to malformed inputs
-pefile>=2024.0              # PE timestamp, sections, imports
-androguard>=4.1             # Android APK/DEX (cross-platform extension, not used in Win32 phase)
+# Static PE / archive / tabular tooling (static analysis only, no binary execution)
+pefile>=2024.0              # PE timestamp, sections, imports (parsed in memory)
+pyzipper>=0.3.6             # AES-encrypted MalwareBazaar sample archives
+openpyxl>=3.1               # MASCOT metadata spreadsheet parsing (Tier-G)
+androguard>=4.1             # Android APK/DEX static parsing (optional extension)
 
 # Testing
-pytest>=8.0
+pytest>=7.4
 
 # NOTE: hashlib, json, csv, etc. are Python stdlib and need no pin.

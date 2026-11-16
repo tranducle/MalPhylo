@@ -4,20 +4,20 @@
 This is the FIRST real MalPhylo-on-binary run. Extracts interpretable features
 from raw PE samples stored as password-protected ZIPs (password "infected").
 
-Gate G1 checks (experiment_plan §4):
+Gate G1 checks (evaluation design):
   - coverage %: fraction of manifest samples with raw PE on disk that parse
-  - packing log: which samples are detected as packed (§3.2)
-  - feature groups extracted per sample (6 groups per §3.1)
+  - packing log: which samples are detected as packed (Section 3.3)
+  - feature groups extracted per sample (6 groups per Section 3.3)
 
-Outputs (per experiment_plan §5 artifact contract):
-  runs/R-G1/metrics.json, run.log, features.jsonl, packing_log.jsonl, config.yaml
+Outputs (per artifact layout specification):
+  results/R-G1/metrics.json, run.log, features.jsonl, packing_log.jsonl, config.yaml
 
-Safety: static analysis only (Decision 5). No malware execution. PE binaries
+Safety: static analysis only. No malware execution. PE binaries
 are extracted in-memory from password-protected ZIPs, parsed by pefile, and
 never written to disk as raw executables.
 
 Usage:
-  PYTHONPATH=src python3 scripts/run_g1_features.py [--limit N] [--config configs/r_g1.yaml]
+  python3 scripts/features/run_g1_features.py [--limit N]
 """
 from __future__ import annotations
 
@@ -26,7 +26,6 @@ import io
 import json
 import os
 import sys
-import tempfile
 import time
 import zipfile
 from collections import Counter
@@ -43,27 +42,26 @@ try:
 except ImportError:
     HAS_PYZIPPER = False
 
-# Add src to path
+# Add repo root to path
 HERE = Path(__file__).resolve().parent
-EXP_DIR = HERE.parent
-sys.path.insert(0, str(EXP_DIR / "src"))
+EXP_DIR = HERE.parent.parent
+sys.path.insert(0, str(EXP_DIR))
 
 from malphpylo.config import PackingConfig
 from malphpylo.features import (
     SampleFeatures,
-    extract_pe_features,
-    extract_features_from_bytes,
+    extract_pe_features_from_bytes,
 )
 
 ZIP_PW = b"infected"
 SAMPLES_DIR = EXP_DIR / "data" / "malwarebazaar" / "samples"
 MANIFEST_PATH = EXP_DIR / "data" / "malwarebazaar" / "manifest.jsonl"
-OUT_DIR = EXP_DIR / "runs" / "R-G1"
+OUT_DIR = EXP_DIR / "results" / "R-G1"
 
 
-# --------------------------------------------------------------------------- #
+# ===========================================================================
 # Serialization: SampleFeatures → JSON-safe dict
-# --------------------------------------------------------------------------- #
+# ===========================================================================
 def serialize_features(sf: SampleFeatures) -> Dict[str, Any]:
     """Convert SampleFeatures dataclass to a JSON-serializable dict."""
     return {
@@ -113,9 +111,9 @@ def serialize_features(sf: SampleFeatures) -> Dict[str, Any]:
     }
 
 
-# --------------------------------------------------------------------------- #
+# ===========================================================================
 # PE extraction from password-protected ZIP
-# --------------------------------------------------------------------------- #
+# ===========================================================================
 def extract_pe_from_zip(zip_path: Path) -> Optional[bytes]:
     """Extract the PE binary from a password-protected ZIP (pw 'infected').
     Handles both standard ZipCrypto and AES-128 encrypted ZIPs.
@@ -150,9 +148,9 @@ def extract_pe_from_zip(zip_path: Path) -> Optional[bytes]:
         return None
 
 
-# --------------------------------------------------------------------------- #
+# ===========================================================================
 # Main runner
-# --------------------------------------------------------------------------- #
+# ===========================================================================
 def run(limit: Optional[int] = None, config_path: Optional[str] = None) -> Dict:
     OUT_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -229,14 +227,9 @@ def run(limit: Optional[int] = None, config_path: Optional[str] = None) -> Dict:
                 error_log.append({"sha256": sha, "error": "zip_extract_failed"})
                 continue
 
-            # Write to temp file for pefile parsing (extract_pe_features needs a path)
+            # Parse PE bytes directly in memory (zero raw executables written to disk)
             try:
-                with tempfile.NamedTemporaryFile(suffix=".exe", delete=False) as tmp:
-                    tmp.write(pe_data)
-                    tmp_path = tmp.name
-
-                sf = extract_pe_features(tmp_path, sha, fam, packing_cfg)
-                os.unlink(tmp_path)  # clean up temp file
+                sf = extract_pe_features_from_bytes(pe_data, sha, fam, packing_cfg)
 
                 if sf.packed:
                     packed_count += 1
@@ -261,12 +254,6 @@ def run(limit: Optional[int] = None, config_path: Optional[str] = None) -> Dict:
             except Exception as e:
                 parse_fail += 1
                 error_log.append({"sha256": sha, "error": str(e)[:200]})
-                # Try to clean up temp file
-                try:
-                    if "tmp_path" in locals():
-                        os.unlink(tmp_path)
-                except Exception:
-                    pass
 
     elapsed = time.time() - t0
 

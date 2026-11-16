@@ -1,15 +1,15 @@
-"""Trust-renormalized weighted similarity (§3.3) — formal properties enforced.
+"""Trust-renormalized weighted similarity (Section 3.3) - formal properties enforced.
 
 sim(s_i, s_j) = sum_{g in G_tr} alpha_g * sim_g / sum_{g in G_tr} alpha_g
 
-Verified properties (§3.3, not assumed):
+Verified properties (Section 3.3, not assumed):
   (i)  symmetry: sim(s_i,s_j) = sim(s_j,s_i)
   (ii) sim in [0,1]
-  (iii) NO imputation — untrusted groups removed from numerator AND denominator,
+  (iii) NO imputation - untrusted groups removed from numerator AND denominator,
        never set to zero (packing never deflates similarity)
   (iv) if G_tr empty -> sim = BOTTOM (sentinel), excluded from MST + candidates
 
-Temporal asymmetry is applied ONLY at edge orientation (§2.4 kappa), never
+Temporal asymmetry is applied ONLY at edge orientation (Section 3.2 kappa), never
 inside sim, keeping the similarity graph undirected as the maximum spanning
 tree requires.
 """
@@ -24,25 +24,25 @@ import numpy as np
 from .features import SampleFeatures
 
 
-# Sentinel for sim = BOTTOM (§3.3 property iv): no trusted groups.
+# Sentinel for sim = BOTTOM (Section 3.3 property iv): no trusted groups.
 BOTTOM: Optional[float] = None
 
 
 @dataclass(frozen=True)
 class SimilarityResult:
-    """A pairwise similarity with provenance for the evidence ledger (§4.4)."""
-    value: Optional[float]      # None == BOTTOM (§3.3 iv)
+    """A pairwise similarity with provenance for the evidence ledger (Section 3.6)."""
+    value: Optional[float]      # None == BOTTOM (Section 3.3 iv)
     per_group: Dict[str, float]  # group -> sim_g (only for trusted groups)
     trusted_groups: Set[str]    # G_tr(i,j)
     used_alpha: Dict[str, float]
 
 
-# ---------------------------------------------------------------------------
-# Per-group similarity functions (fixed per group type, §3.3)
-# ---------------------------------------------------------------------------
+# ===========================================================================
+# Per-group similarity functions (fixed per group type, Section 3.3)
+# ===========================================================================
 
 def _jaccard(a: frozenset, b: frozenset) -> float:
-    """Jaccard for import/export sets (§3.3). Symmetric, in [0,1]."""
+    """Jaccard for import/export sets (Section 3.3). Symmetric, in [0,1]."""
     if not a and not b:
         return 0.0  # both empty: no shared signal; not 1.0
     inter = len(a & b)
@@ -51,7 +51,7 @@ def _jaccard(a: frozenset, b: frozenset) -> float:
 
 
 def _cosine(a: np.ndarray, b: np.ndarray) -> float:
-    """Cosine for opcode n-gram distributions + byte/entropy histograms (§3.3)."""
+    """Cosine for opcode n-gram distributions + byte/entropy histograms (Section 3.3)."""
     if a.size == 0 or b.size == 0:
         return 0.0
     n = min(a.size, b.size)
@@ -64,7 +64,7 @@ def _cosine(a: np.ndarray, b: np.ndarray) -> float:
 
 
 def _histogram_intersection(a: np.ndarray, b: np.ndarray) -> float:
-    """Histogram intersection for string-entropy distributions (§3.3)."""
+    """Histogram intersection for string-entropy distributions (Section 3.3)."""
     if a.size == 0 or b.size == 0:
         return 0.0
     n = min(a.size, b.size)
@@ -72,7 +72,7 @@ def _histogram_intersection(a: np.ndarray, b: np.ndarray) -> float:
 
 
 def _section_similarity(a_sections, b_sections) -> float:
-    """Weighted categorical+scalar overlap for section metadata (§3.3)."""
+    """Weighted categorical+scalar overlap for section metadata (Section 3.3)."""
     if not a_sections or not b_sections:
         return 0.0
     # match by closest entropy + name; scalar overlap on vsize/rsize
@@ -90,19 +90,21 @@ def _section_similarity(a_sections, b_sections) -> float:
 
 
 def _cfg_similarity(a_pct: np.ndarray, b_pct: np.ndarray) -> float:
-    """CFG topology similarity via percentile-vector cosine (§3.3)."""
+    """CFG topology similarity via percentile-vector cosine (Section 3.3)."""
     if a_pct.size == 0 or b_pct.size == 0:
         return 0.0
     n = min(a_pct.size, b_pct.size)
-    return _cosine(a_pct[:n] + 1e-9, b_pct[:n] + 1e-9)
+    if np.all(a_pct[:n] == 0) or np.all(b_pct[:n] == 0):
+        return 0.0
+    return _cosine(a_pct[:n], b_pct[:n])
 
 
-# ---------------------------------------------------------------------------
+# ===========================================================================
 # Group-level dispatcher
-# ---------------------------------------------------------------------------
+# ===========================================================================
 
 def group_similarity(group: str, a: SampleFeatures, b: SampleFeatures) -> float:
-    """Compute sim_g for a single feature group (§3.3). Returns float in [0,1]."""
+    """Compute sim_g for a single feature group (Section 3.3). Returns float in [0,1]."""
     if group == "imports":
         return _jaccard(a.imports.symbol_set, b.imports.symbol_set)
     if group == "string_entropy":
@@ -126,24 +128,24 @@ def group_similarity(group: str, a: SampleFeatures, b: SampleFeatures) -> float:
     raise ValueError(f"unknown feature group: {group}")
 
 
-# ---------------------------------------------------------------------------
-# Trust-renormalized weighted mean (§3.3)
-# ---------------------------------------------------------------------------
+# ===========================================================================
+# Trust-renormalized weighted mean (Section 3.3)
+# ===========================================================================
 
 def pairwise_similarity(a: SampleFeatures,
                         b: SampleFeatures,
                         alpha: Dict[str, float],
                         enabled_groups: list) -> SimilarityResult:
-    """Compute the trust-renormalized weighted-mean similarity (§3.3).
+    """Compute the trust-renormalized weighted-mean similarity (Section 3.3).
 
     Enforces all four formal properties by construction:
-      (i)   symmetry — every sim_g is symmetric and G_tr is pair-symmetric
-      (ii)  [0,1]    — weighted mean of [0,1] values is in [0,1]
-      (iii) NO imputation — untrusted groups removed from numerator AND
+      (i)   symmetry - every sim_g is symmetric and G_tr is pair-symmetric
+      (ii)  [0,1]    - weighted mean of [0,1] values is in [0,1]
+      (iii) NO imputation - untrusted groups removed from numerator AND
             denominator (never zeroed)
       (iv)  BOTTOM sentinel when G_tr is empty
     """
-    # G_tr(i,j): groups trusted for BOTH endpoints (§3.2 + §3.3)
+    # G_tr(i,j): groups trusted for BOTH endpoints (Section 3.3 + Section 3.3)
     a_trusted = a.trusted_groups()
     b_trusted = b.trusted_groups()
     g_tr = (a_trusted & b_trusted) & set(enabled_groups)

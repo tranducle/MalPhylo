@@ -1,7 +1,7 @@
 """
 MalPhylo configuration schema and loader.
 
-Per experiment_plan.md §5: every run reads a YAML config (dataset path, split,
+Per pipeline configuration schema: every run reads a YAML config (dataset path, split,
 feature weights, seeds, output dir). No hardcoded values in scripts.
 """
 from __future__ import annotations
@@ -18,7 +18,7 @@ import yaml
 class FeatureGroupConfig:
     """Per-group enable + which groups are 'index' (I) vs 'background' (B).
 
-    Per methodology §4.2: I = {imports, string-entropy, section-metadata};
+    Per Section 3.5: I = {imports, string-entropy, section-metadata};
     B = {opcodes, byte/entropy histograms, CFG topology}.
     """
     enabled: List[str] = field(default_factory=lambda: [
@@ -35,7 +35,7 @@ class FeatureGroupConfig:
 
 @dataclass(frozen=True)
 class PackingConfig:
-    """Packing detection / trust-renormalization thresholds (§3.2).
+    """Packing detection / trust-renormalization thresholds (Section 3.3).
 
     All thresholds fixed a priori and reported in the evidence ledger.
     """
@@ -48,7 +48,7 @@ class PackingConfig:
 
 @dataclass(frozen=True)
 class TemporalConfig:
-    """Multi-signal temporal alignment (§4.3) + κ total order (§2.4).
+    """Multi-signal temporal alignment (Section 5.4) + κ total order (Section 3.2).
 
     Signals ranked by reliability; conflicts recorded in evidence ledger.
     """
@@ -59,13 +59,13 @@ class TemporalConfig:
         "code_reuse_order",    # (4) code-reuse temporal ordering
         "string_markers",      # (5) compiler version / build-path dates
     ])
-    epsilon_seconds: int = 1   # §2.1.1: V_I tau = min-child-tau - epsilon
-    sentinel_label: str = "TAU_BOT"  # τ⊥ sentinel class (§2.4 rule 1)
+    epsilon_seconds: int = 1   # Section 3.1: V_I tau = min-child-tau - epsilon
+    sentinel_label: str = "TAU_BOT"  # τ⊥ sentinel class (Section 3.2 rule 1)
 
 
 @dataclass(frozen=True)
 class EdgeTypingConfig:
-    """Edge-type decision thresholds (§4.2). Fixed a priori, ablated (G4)."""
+    """Edge-type decision thresholds (Section 3.5). Fixed a priori, ablated (G4)."""
     # rule 1: convergent
     theta_I_lo: float = 0.20
     theta_fp: float = 0.05    # entropy-histogram L2 distance for packer fingerprint
@@ -79,13 +79,13 @@ class EdgeTypingConfig:
     # rule 4: parent-child
     theta_pc: float = 0.60    # overall similarity threshold
     theta_delta: float = 0.20 # |r_bar_I - r_bar_B| <= theta_delta (uniform sim)
-    # candidate admission (§4.2 predicate)
+    # candidate admission (Section 3.5 predicate)
     require_kappa_orientation: bool = True
 
 
 @dataclass(frozen=True)
 class MSTConfig:
-    """MST skeleton (§4.1 step 2). Maximum spanning tree (sim is a proximity)."""
+    """MST skeleton (Section 3.4 step 2). Maximum spanning tree (sim is a proximity)."""
     top_k_neighbors: int = 50         # prune to top-k for scalability
     handle_disconnection: bool = True # component-merge when top-k disconnects
 
@@ -98,10 +98,10 @@ class RunConfig:
     dataset_path: str
     platform: str                      # "win32_pe" | "android"
     sample_limit: Optional[int] = None # for smoke runs
-    output_dir: str = "runs"
+    output_dir: str = "results"
     seed: int = 42
     feature_weights: Dict[str, float] = field(default_factory=lambda: {
-        # alpha vector, sum = 1, set a priori (§3.3). Ablated in G4.
+        # alpha vector, sum = 1, set a priori (Section 3.3). Ablated in G4.
         "opcode_ngrams": 0.20,
         "cfg_topology": 0.15,
         "imports": 0.20,
@@ -117,7 +117,7 @@ class RunConfig:
 
     def validate(self) -> None:
         """Validate config invariants before any run."""
-        # alpha vector must sum to 1 (§3.3)
+        # alpha vector must sum to 1 (Section 3.3)
         total = sum(self.feature_weights.values())
         if not (0.999 <= total <= 1.001):
             raise ValueError(
@@ -137,38 +137,51 @@ class RunConfig:
 
 def load_config(path: str | Path) -> RunConfig:
     """Load a YAML run config and validate it."""
-    with open(path, "r") as f:
-        raw: Dict[str, Any] = yaml.safe_load(f)
+    with open(path, "r", encoding="utf-8") as f:
+        raw: Dict[str, Any] = yaml.safe_load(f) or {}
+
+    f_raw = raw.get("features") or {}
+    p_raw = raw.get("packing") or {}
+    t_raw = raw.get("temporal") or {}
+    e_raw = raw.get("edge_typing") or {}
+    m_raw = raw.get("mst") or {}
+
+    f_def = FeatureGroupConfig()
+    p_def = PackingConfig()
+    t_def = TemporalConfig()
+    e_def = EdgeTypingConfig()
+    m_def = MSTConfig()
 
     features = FeatureGroupConfig(
-        enabled=raw.get("features", {}).get("enabled"),
-        index_groups=raw.get("features", {}).get("index_groups"),
-        background_groups=raw.get("features", {}).get("background_groups"),
+        enabled=f_raw.get("enabled", f_def.enabled),
+        index_groups=f_raw.get("index_groups", f_def.index_groups),
+        background_groups=f_raw.get("background_groups", f_def.background_groups),
     )
     packing = PackingConfig(
-        section_entropy_threshold=raw.get("packing", {}).get("section_entropy_threshold"),
-        min_code_entropy=raw.get("packing", {}).get("min_code_entropy"),
-        known_packer_signatures=raw.get("packing", {}).get("known_packer_signatures"),
+        section_entropy_threshold=p_raw.get("section_entropy_threshold", p_def.section_entropy_threshold),
+        min_code_entropy=p_raw.get("min_code_entropy", p_def.min_code_entropy),
+        known_packer_signatures=p_raw.get("known_packer_signatures", p_def.known_packer_signatures),
     )
     temporal = TemporalConfig(
-        signals=raw.get("temporal", {}).get("signals"),
-        epsilon_seconds=raw.get("temporal", {}).get("epsilon_seconds"),
-        sentinel_label=raw.get("temporal", {}).get("sentinel_label"),
+        signals=t_raw.get("signals", t_def.signals),
+        epsilon_seconds=t_raw.get("epsilon_seconds", t_def.epsilon_seconds),
+        sentinel_label=t_raw.get("sentinel_label", t_def.sentinel_label),
     )
     edge_typing = EdgeTypingConfig(
-        theta_I_lo=raw.get("edge_typing", {}).get("theta_I_lo"),
-        theta_I_hi=raw.get("edge_typing", {}).get("theta_I_hi"),
-        theta_B_lo=raw.get("edge_typing", {}).get("theta_B_lo"),
-        k_tool=raw.get("edge_typing", {}).get("k_tool"),
-        theta_loc=raw.get("edge_typing", {}).get("theta_loc"),
-        L_bor=raw.get("edge_typing", {}).get("L_bor"),
-        theta_pc=raw.get("edge_typing", {}).get("theta_pc"),
-        theta_delta=raw.get("edge_typing", {}).get("theta_delta"),
-        require_kappa_orientation=raw.get("edge_typing", {}).get("require_kappa_orientation"),
+        theta_I_lo=e_raw.get("theta_I_lo", e_def.theta_I_lo),
+        theta_fp=e_raw.get("theta_fp", e_def.theta_fp),
+        theta_I_hi=e_raw.get("theta_I_hi", e_def.theta_I_hi),
+        theta_B_lo=e_raw.get("theta_B_lo", e_def.theta_B_lo),
+        k_tool=e_raw.get("k_tool", e_def.k_tool),
+        theta_loc=e_raw.get("theta_loc", e_def.theta_loc),
+        L_bor=e_raw.get("L_bor", e_def.L_bor),
+        theta_pc=e_raw.get("theta_pc", e_def.theta_pc),
+        theta_delta=e_raw.get("theta_delta", e_def.theta_delta),
+        require_kappa_orientation=e_raw.get("require_kappa_orientation", e_def.require_kappa_orientation),
     )
     mst = MSTConfig(
-        top_k_neighbors=raw.get("mst", {}).get("top_k_neighbors"),
-        handle_disconnection=raw.get("mst", {}).get("handle_disconnection"),
+        top_k_neighbors=m_raw.get("top_k_neighbors", m_def.top_k_neighbors),
+        handle_disconnection=m_raw.get("handle_disconnection", m_def.handle_disconnection),
     )
     cfg = RunConfig(
         run_id=raw["run_id"],
@@ -176,7 +189,7 @@ def load_config(path: str | Path) -> RunConfig:
         dataset_path=raw["dataset_path"],
         platform=raw["platform"],
         sample_limit=raw.get("sample_limit"),
-        output_dir=raw.get("output_dir", "runs"),
+        output_dir=raw.get("output_dir", "results"),
         seed=raw.get("seed", 42),
         feature_weights=raw.get("feature_weights"),
         features=features,

@@ -1,5 +1,5 @@
 [21:19:26] ============================================================
-[21:19:26] R-ANN: HNSW index quality — recall@k vs exact kNN
+[21:19:26] R-ANN: HNSW index quality - recall@k vs exact kNN
 [21:19:26] ============================================================
 [21:19:26] HNSW: M=32, ef_construction=200, ef_search=512
 [21:19:26] k grid: [16, 32, 64, 128, 256], k*=32
@@ -12,11 +12,11 @@
 [21:19:28] Building HNSW index...
 [21:19:28] HNSW index built (0.1s)
 [21:19:28] Querying ANN and measuring recall@k...
-[21:19:28]   recall@16: 0.9199 (std=0.0758) — FAIL
-[21:19:28]   recall@32: 0.9632 (std=0.0250) — PASS
-[21:19:28]   recall@64: 0.9802 (std=0.0164) — PASS
-[21:19:28]   recall@128: 0.9912 (std=0.0051) — PASS
-[21:19:29]   recall@256: 0.9954 (std=0.0034) — PASS
+[21:19:28]   recall@16: 0.9199 (std=0.0758) - FAIL
+[21:19:28]   recall@32: 0.9632 (std=0.0250) - PASS
+[21:19:28]   recall@64: 0.9802 (std=0.0164) - PASS
+[21:19:28]   recall@128: 0.9912 (std=0.0051) - PASS
+[21:19:29]   recall@256: 0.9954 (std=0.0034) - PASS
 [21:19:29] ANN queries done (0.7s)
 [21:19:29] 
 ============================================================

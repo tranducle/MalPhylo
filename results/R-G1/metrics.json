@@ -67,7 +67,7 @@
   "errors": [],
   "n_errors_total": 0,
   "artifacts": {
-    "features": "<repo_root>/runs/R-G1/features.jsonl",
-    "packing_log": "<repo_root>/runs/R-G1/packing_log.jsonl"
+    "features": "results/R-G1/features.jsonl",
+    "packing_log": "results/R-G1/packing_log.jsonl"
   }
 }

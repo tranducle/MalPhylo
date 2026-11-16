@@ -7,8 +7,8 @@ PACK column was empty. This script fills the gap by detecting toolkit indicators
 project/folder names and creating cross-family edges within each toolkit group.
 
 Methodology grounding:
-  - methodology §4.2 λ-decide taxonomy: "toolkit-share — shared builder/packer toolkit"
-  - experiment_plan §4 R-EDGETYPE-GOLD: Tier-G provenance-anchored edges
+  - Section 3.5 λ-decide taxonomy: "toolkit-share - shared builder/packer toolkit"
+  - evaluation design R-EDGETYPE-GOLD: Tier-G provenance-anchored edges
   - Provenance source: P4_shared_toolkit (keyword/name-based toolkit detection)
 
 Approach:
@@ -22,7 +22,7 @@ Approach:
 Safety: static metadata only. No malware execution.
 
 Usage:
-  python3 scripts/fill_toolkit_share_edges.py
+  python3 scripts/gold_set/fill_toolkit_share_edges.py
 """
 from __future__ import annotations
 
@@ -36,9 +36,9 @@ from typing import Dict, List, Set, Tuple
 import openpyxl
 
 HERE = Path(__file__).resolve().parent
-EXP_DIR = HERE.parent
+EXP_DIR = HERE.parent.parent
 MASCOT_DIR = EXP_DIR / "data" / "mascot-meta"
-GOLD_DIR = EXP_DIR / "runs" / "R-EDGETYPE-GOLD"
+GOLD_DIR = EXP_DIR / "results" / "R-EDGETYPE-GOLD"
 
 # Toolkit detection patterns (ordered by specificity)
 TOOLKIT_PATTERNS: List[Tuple[str, str]] = [

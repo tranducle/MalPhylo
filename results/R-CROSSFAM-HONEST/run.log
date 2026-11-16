@@ -1,7 +1,7 @@
-[11:25:47] === R-CROSSFAM-HONEST START (D1 fix) ===
+[11:25:47] === R-CROSSFAM-HONEST START ===
 [11:25:47] Thresholds: N%=5.0, delta_C1_floor=0.5
 [11:25:48] Loaded 2074 samples in 12 families
-[11:25:48] Loading cached similarity matrix from <repo_root>/runs/R-CROSSFAM-HONEST/sim_matrix.npy
+[11:25:48] Loading cached similarity matrix from results/R-CROSSFAM-HONEST/sim_matrix.npy
 [11:25:48] Building baselines (B1 NJ, B2 UPGMA, B6 network)...
 [11:27:03] B6 edge count (the matched budget) = 15246
 [11:27:03] === Density-matched comparison @ budget=15246 edges ===

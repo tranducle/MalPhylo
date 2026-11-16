@@ -1,7 +1,7 @@
 {
   "run_id": "R-CROSSFAM-HONEST",
   "gate": "G3",
-  "milestone": "C1 density-matched honest re-evaluation (D1 fix)",
+  "milestone": "C1 density-matched honest re-evaluation",
   "timestamp": "2026-06-29T11:27:10",
   "status": "COMPLETED",
   "corpus": {
@@ -26,7 +26,7 @@
     "name": "density_matched_cf_fraction",
     "budget": 15246,
     "budget_basis": "B6 untyped-network edge count (densest baseline)",
-    "fpr_control": "methodology \u00a74.2 N_null (intra-family pairs w/o code-reuse)",
+    "fpr_control": "Section 3.5 N_null (intra-family pairs w/o code-reuse)",
     "fpr_alpha": 0.05,
     "rationale": "Original R-CROSSFAM cf_fraction was a density artefact (745,685 vs 4,146 edges). This metric compares every method at the SAME edge budget, removing the confound."
   },
@@ -123,7 +123,7 @@
     "mean_cf_similarity": 0.509409,
     "median_cf_similarity": 0.487562,
     "frac_cf_pairs_above_0.9": 0.062051,
-    "construct_validity_note": "If mean cross-family similarity is very high (>0.9), much of the measured similarity may reflect shared packer/compiler environment rather than genuine code relatedness; this is reported as a limitation and mitigated by the trust-renormalization of packed sections (methodology \u00a73.2).",
+    "construct_validity_note": "If mean cross-family similarity is very high (>0.9), much of the measured similarity may reflect shared packer/compiler environment rather than genuine code relatedness; this is reported as a limitation and mitigated by the trust-renormalization of packed sections (Section 3.3).",
     "theta_discrimination": [
       {
         "theta": 0.3,
@@ -175,6 +175,6 @@
   "theta_sweep_note": "The theta grid [0.60..0.96] yields an identical operating point at every theta because the sparsity cap (5n edges) binds before the theta filter: there are >=5n cross-family pairs above even theta=0.96. Theta therefore does not discriminate in this range; the reported theta=0.60 is the first (least-strict) grid point at which a valid sparse typed DAG exists, NOT a converged optimum. This is reported transparently rather than framed as an optimization result.",
   "honest_verdict": "PASS",
   "honest_verdict_reason": "Sparse phylogeny-like operating point exists (<=5n edges) with non-degenerate typed augmentation (>=1 per sample) at mean similarity >=0.5. C1 is claimed as typed-reticulation CAPACITY (structural), NOT recovery superiority.",
-  "reconciliation_note": "This run REPLACES the cf_fraction comparison in R-CROSSFAM/R-MAIN-Win for the C1 claim. The original R-CROSSFAM cf_fraction=0.998 is retained only as a structural-representation-capacity diagnostic, NOT as the C1 success metric (per CONTRADICTIONS_REPORT D1).",
+  "reconciliation_note": "This run REPLACES the cf_fraction comparison in R-CROSSFAM/R-MAIN-Win for the C1 claim. The original R-CROSSFAM cf_fraction=0.998 is retained only as a structural-representation-capacity diagnostic, NOT as the C1 success metric (replaced by density-matched C1 capacity evaluation).",
   "timing_seconds": 82.49
 }

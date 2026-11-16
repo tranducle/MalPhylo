@@ -1,6 +1,6 @@
 {
   "run_id": "R-ANN",
-  "milestone": "HNSW index quality \u2014 recall@k vs exact kNN",
+  "milestone": "HNSW index quality - recall@k vs exact kNN",
   "gate": "G5/G6",
   "timestamp": "2026-06-28T21:19:29",
   "status": "COMPLETED",

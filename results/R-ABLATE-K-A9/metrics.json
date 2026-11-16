@@ -1,6 +1,6 @@
 {
   "run_id": "R-ABLATE-K-A9",
-  "milestone": "G4 ablations: k-sensitivity (A8) + temporal LOO (A9) [FIXED]",
+  "milestone": "G4 ablations: k-sensitivity (A8) + temporal LOO (A9)",
   "gate": "G4",
   "timestamp": "2026-06-28T21:39:22",
   "status": "COMPLETED",

@@ -1,7 +1,7 @@
 """R-SMOKE-1 pipeline runner + synthetic data generator.
 
-Per experiment_plan.md §4: R-SMOKE-1 = sanity run, pipeline end-to-end on 1K
-samples. Goal: completes, no crash. Labeled SMOKE — precedes G2.
+Per pipeline specification (Section 3.4): R-SMOKE-1 = sanity run, pipeline end-to-end on 1K
+samples. Goal: completes, no crash. Labeled SMOKE - precedes G2.
 
 This module provides:
   - run_pipeline(cfg): end-to-end run from config
@@ -27,9 +27,9 @@ from .features import SampleFeatures, extract
 from .logging_utils import EvidenceLedger, dump_metrics, setup_logger
 
 
-# ---------------------------------------------------------------------------
-# Synthetic corpus — deterministic, no real malware needed for smoke test
-# ---------------------------------------------------------------------------
+# ===========================================================================
+# Synthetic corpus - deterministic, no real malware needed for smoke test
+# ===========================================================================
 
 _FAMILIES = [
     "mirai", "emotet", "trickbot", "wannacry", "agenttesla",
@@ -43,7 +43,7 @@ def _family_blob(family: str, variant: int, seed: int) -> bytes:
 
     Design: large low-entropy family signature (ASCII repetition ~1.5KB) so
     intra-family byte-histogram similarity is high AND section entropy stays
-    below the packing threshold (§3.2: 7.2 bits). Small variant noise (256B)
+    below the packing threshold (Section 3.3: 7.2 bits). Small variant noise (256B)
     distinguishes variants without overwhelming the signature.
     """
     seed_key = abs(hash((family, variant, seed))) % (2 ** 32)
@@ -52,14 +52,14 @@ def _family_blob(family: str, variant: int, seed: int) -> bytes:
     fam_sig = (family.encode() + b"\x00") * 200  # ~1.6-2.0 KB
     # variant-specific deterministic noise (small fraction of total)
     noise = bytes(rng.randint(0, 255) for _ in range(256))
-    # builder/kit string marker (toolkit-share signal, §4.2 rule 2)
+    # builder/kit string marker (toolkit-share signal, Section 3.5 rule 2)
     builder = f"BUILDER_{family.upper()}_{variant % 3}".encode()
     blob = fam_sig + noise + builder
     return blob
 
 
 # Shared cross-family builder kit (substantial, so byte-histogram + string
-# overlap create toolkit-share candidates across families, §4.2 rule 2)
+# overlap create toolkit-share candidates across families, Section 3.5 rule 2)
 _SHARED_KIT = (
     b"MIRAI_BUILDER_CORE_v2.3\x00" * 40 +
     b"telnet_scan_module\x00" * 20 +
@@ -71,13 +71,14 @@ _SHARED_KIT = (
 def generate_synthetic_corpus(n: int,
                               seed: int = 42,
                               platform: str = "win32_pe",
-                              n_families: int = 12) -> List[SampleFeatures]:
+                              n_families: int = 12,
+                              packing_cfg: Optional["PackingConfig"] = None) -> List[SampleFeatures]:
     """Generate n deterministic synthetic samples for the smoke test.
 
-    Design (exercises all §4.1/§4.2 code paths):
+    Design (exercises all Section 3.4/Section 3.5 code paths):
       - intra-family: large shared signature -> high similarity (MST clusters)
       - cross-family: ~15% of samples across 2+ families embed _SHARED_KIT
-        -> toolkit-share candidates (§4.2 rule 2) for augmentation path
+        -> toolkit-share candidates (Section 3.5 rule 2) for augmentation path
       - temporal: deterministic PE timestamps spread across 2020-2025
     """
     rng = random.Random(seed)
@@ -96,21 +97,23 @@ def generate_synthetic_corpus(n: int,
         # temporal signal: spread deterministically
         ts = base_ts + (variant * 86400 * 30) + (i * 3600)
         sid = f"syn_{i:05d}_{fam}"
-        feat = extract(blob, sid, fam, platform,
-                       __import__("malphpylo.config", fromlist=["PackingConfig"]).PackingConfig())
+        if packing_cfg is None:
+            from .config import PackingConfig
+            packing_cfg = PackingConfig()
+        feat = extract(blob, sid, fam, platform, packing_cfg)
         feat.temporal_signals = {"pe_timestamp": float(ts)}
         samples.append(feat)
     return samples
 
 
-# ---------------------------------------------------------------------------
-# End-to-end pipeline (§4.1 + §4.2 + §4.3 + evidence ledger)
-# ---------------------------------------------------------------------------
+# ===========================================================================
+# End-to-end pipeline (Section 3.4 + Section 3.5 + Section 5.4 + evidence ledger)
+# ===========================================================================
 
 def run_pipeline(cfg: RunConfig) -> Dict:
     """Execute the full MalPhylo pipeline for one run config.
 
-    Stages (mirrors §4.1 + scientific gate ladder):
+    Stages (mirrors Section 3.4 + scientific gate ladder):
       G1: feature extraction (R-G1)
       similarity computation
       G2: DAG construction (MST skeleton + augmentation + V_I + acyclicity)
@@ -125,12 +128,14 @@ def run_pipeline(cfg: RunConfig) -> Dict:
     metrics: Dict = {"run_id": cfg.run_id, "run_type": cfg.run_type, "seed": cfg.seed}
 
     with EvidenceLedger(run_dir / "evidence.jsonl") as ledger:
-        # ---- G1: feature extraction (or load synthetic) ----
+        # === G1: feature extraction (or load synthetic) ===
         logger.info("Stage G1: feature extraction")
         t_g1 = time.time()
         if cfg.dataset_path == "synthetic":
             n = cfg.sample_limit or 1000
-            samples = generate_synthetic_corpus(n, seed=cfg.seed, platform=cfg.platform)
+            samples = generate_synthetic_corpus(
+                n, seed=cfg.seed, platform=cfg.platform, packing_cfg=cfg.packing
+            )
         else:
             # real corpus: scan directory for PE/APK files
             dpath = Path(cfg.dataset_path)
@@ -159,8 +164,8 @@ def run_pipeline(cfg: RunConfig) -> Dict:
         logger.info(f"G1 done: {len(samples)} samples, {metrics['n_packed']} packed, "
                     f"{len(families)} families, {t_g1_dur:.2f}s")
 
-        # ---- DAG construction (§4.1: similarity + MST + augment + V_I + Kahn) ----
-        logger.info("Stage G2: DAG construction (§4.1)")
+        # === DAG construction (Section 3.4: similarity + MST + augment + V_I + Kahn) ===
+        logger.info("Stage G2: DAG construction (Section 3.4)")
         t_g2 = time.time()
         result: DAGConstructionResult = construct_dag(samples, cfg)
         t_g2_dur = time.time() - t_g2
@@ -170,6 +175,7 @@ def run_pipeline(cfg: RunConfig) -> Dict:
         metrics["n_edges_total"] = result.graph.number_of_edges()
         metrics["n_mst_edges"] = result.n_mst_edges
         metrics["n_augment_edges"] = result.n_augment_edges
+        metrics["n_internal_edges"] = metrics["n_edges_total"] - (result.n_mst_edges + result.n_augment_edges)
         metrics["n_bottom_pairs"] = result.bottom_pairs
         metrics["n_rejected_candidates"] = len(result.rejected)
         metrics["acyclicity_verified"] = result.acyclicity_verified
@@ -181,18 +187,20 @@ def run_pipeline(cfg: RunConfig) -> Dict:
         ledger.record("g2_complete", {
             "n_vertices": metrics["n_vertices"], "n_edges": metrics["n_edges_total"],
             "n_mst": result.n_mst_edges, "n_augment": result.n_augment_edges,
+            "n_internal_vi": result.n_internal_inserted,
+            "n_internal_edges": metrics["n_internal_edges"],
             "acyclic": result.acyclicity_verified, "duration_s": t_g2_dur,
             "edge_types": label_counts,
         })
-        logger.info(f"G2 done: {metrics['n_vertices']} vertices, "
+        logger.info(f"G2 done: {metrics['n_vertices']} vertices ({result.n_internal_inserted} V_I), "
                     f"{metrics['n_edges_total']} edges "
-                    f"(MST={result.n_mst_edges}, augment={result.n_augment_edges}), "
+                    f"(MST_init={result.n_mst_edges}, augment={result.n_augment_edges}, VI_rewire=+{metrics['n_internal_edges']}), "
                     f"acyclic={result.acyclicity_verified}, {t_g2_dur:.2f}s")
 
-        # ---- write GraphML (per §5 output artifacts) ----
+        # === write GraphML (per pipeline configuration schema output artifacts) ===
         nx.write_graphml(result.graph, run_dir / "dag.graphml")
 
-        # ---- write rejected candidates ledger ----
+        # === write rejected candidates ledger ===
         with open(run_dir / "rejected_candidates.json", "w") as f:
             json.dump(result.rejected, f, indent=2, default=str)
 
@@ -201,6 +209,9 @@ def run_pipeline(cfg: RunConfig) -> Dict:
     metrics["status"] = "COMPLETE" if result.acyclicity_verified else "ACYCLICITY_FAILED"
     dump_metrics(run_dir, metrics)
     logger.info(f"=== END run {cfg.run_id}: {metrics['status']} in {total:.2f}s ===")
+    for h in list(logger.handlers):
+        h.close()
+        logger.removeHandler(h)
     return metrics
 
 

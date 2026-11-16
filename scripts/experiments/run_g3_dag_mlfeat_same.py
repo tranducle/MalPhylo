@@ -11,11 +11,11 @@ with a SAME-CORPUS comparison on R-G1 (3002 samples):
 5. Non-inferiority test: Δ(MalPhylo - PCA-ML) within δ_eq=0.10
 
 This is fair: both use the same data, only the representation differs.
-PCA captures the dominant variance directions — a reasonable ML embedding proxy.
+PCA captures the dominant variance directions - a reasonable ML embedding proxy.
 
 Runs 5 times for stability.
 
-Outputs: runs/R-DAG-MLFEAT-SAME/{metrics.json, run.log, config.yaml}
+Outputs: results/R-DAG-MLFEAT-SAME-v2/{metrics.json, run.log, config.yaml}
 """
 from __future__ import annotations
 
@@ -27,15 +27,15 @@ import numpy as np
 import yaml
 
 HERE = Path(__file__).resolve().parent
-EXP_DIR = HERE.parent
-sys.path.insert(0, str(EXP_DIR / "src"))
+EXP_DIR = HERE.parent.parent
+sys.path.insert(0, str(EXP_DIR))
 
-RG1_PATH = EXP_DIR / "runs" / "R-G1" / "features.jsonl"
-THRESH_PATH = EXP_DIR / "config" / "thresholds.yaml"
-OUT_DIR = EXP_DIR / "runs" / "R-DAG-MLFEAT-SAME-v2"  # D3 fix: canonical 12-family corpus
+RG1_PATH = EXP_DIR / "results" / "R-G1" / "features.jsonl"
+THRESH_PATH = EXP_DIR / "configs" / "thresholds.yaml"
+OUT_DIR = EXP_DIR / "results" / "R-DAG-MLFEAT-SAME-v2"  # canonical 12-family corpus
 
 N_RUNS = 5
-# G5 FIX (Session 24 review): do NOT cap before the family filter. The previous
+# Filter to canonical target families before applying per-family sample caps.
 # limit=2074 read only the FIRST 2074 lines of features.jsonl, then the >=100/
 # family filter removed many Unknown/small-family rows, leaving n=687 (not the
 # canonical 2074 12-family corpus). To match R-CROSSFAM-HONEST exactly, load ALL
@@ -124,7 +124,7 @@ def main():
     t0 = time.time()
     features, families, ids = load_features(str(RG1_PATH), MAX_SAMPLES)
 
-    # D3 FIX: apply the SAME family filter as R-CROSSFAM so the No-ML control
+    # Apply the same canonical 12-family filter so the No-ML control
     # runs on the canonical 12-family corpus (>=100 samples/family, no Unknown).
     # The previous 500-sample cap without this filter admitted "Bumblebee" (a
     # <100 family), causing a 13-vs-12 family contradiction with R-CROSSFAM.
@@ -137,7 +137,7 @@ def main():
     ids = [i for i, k in zip(ids, keep_mask) if k]
 
     n, dim = features.shape
-    log(f"Loaded {n} samples (D3 fix: {len(valid_families)} families, >=100 each), {dim} dimensions")
+    log(f"Loaded {n} samples ( {len(valid_families)} families, >=100 each), {dim} dimensions")
     fam_counts = Counter(families)
     log(f"Families: {len(fam_counts)} ({dict(fam_counts.most_common(5))}...)")
 
@@ -154,7 +154,7 @@ def main():
     for run_idx in range(N_RUNS):
         seed = 42 + run_idx
         np.random.seed(seed)
-        log(f"\n--- Run {run_idx+1}/{N_RUNS} (seed={seed}) ---")
+        log(f"\n=== Run {run_idx+1}/{N_RUNS} (seed={seed}) ===")
 
         # MalPhylo: interpretable similarity (cosine on standardized raw features)
         norms_mp = np.linalg.norm(features_std, axis=1, keepdims=True)
@@ -212,7 +212,7 @@ def main():
     log(f"\n{'='*70}")
     log(f"STABILITY CHECK ({N_RUNS} runs)")
     log(f"  All NON-INFERIOR: {all_ni}")
-    log(f"  Δ: mean={delta_mean:+.4f}, std={delta_std:.4f} — {deltas}")
+    log(f"  Δ: mean={delta_mean:+.4f}, std={delta_std:.4f} - {deltas}")
     log(f"  Stable (std<0.02): {stable}")
     final = "NON-INFERIOR (STABLE)" if all_ni and stable else "UNSTABLE"
     log(f"  Final: {final}")

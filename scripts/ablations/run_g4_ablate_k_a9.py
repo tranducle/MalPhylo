@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""R-ABLATE-K (A8) + R-ABLATE-TEMP-LOO (A9): G4 ablations — FIXED.
+"""R-ABLATE-K (A8) + R-ABLATE-TEMP-LOO (A9): G4 ablations - FIXED.
 
 A8 (k-sensitivity): vary top-k over {16,32,64,128,256,512}. Extended grid
   to detect saturation. k* = smallest k where cf_rate saturates within 2%
@@ -11,7 +11,7 @@ A9 (leave-one-out temporal signal): 5 signals with INDEPENDENT noise.
   → non-zero LOO deltas. Signals that contribute to consistency
   improvement (Δ ≥ Δ_sig_floor=2.0%) survive.
 
-Outputs: runs/R-ABLATE-K-A9/{metrics.json, run.log, config.yaml}
+Outputs: results/R-ABLATE-K-A9/{metrics.json, run.log, config.yaml}
 """
 from __future__ import annotations
 
@@ -23,27 +23,27 @@ import numpy as np
 import yaml
 
 HERE = Path(__file__).resolve().parent
-EXP_DIR = HERE.parent
-sys.path.insert(0, str(EXP_DIR / "src"))
+EXP_DIR = HERE.parent.parent
+sys.path.insert(0, str(EXP_DIR))
 
-RG1_PATH = EXP_DIR / "runs" / "R-G1" / "features.jsonl"
-THRESH_PATH = EXP_DIR / "config" / "thresholds.yaml"
-OUT_DIR = EXP_DIR / "runs" / "R-ABLATE-K-A9"
+RG1_PATH = EXP_DIR / "results" / "R-G1" / "features.jsonl"
+THRESH_PATH = EXP_DIR / "configs" / "thresholds.yaml"
+OUT_DIR = EXP_DIR / "results" / "R-ABLATE-K-A9"
 
 K_GRID = [16, 32, 64, 128, 256, 512]
 MAX_SAMPLES = 1000
 SEED = 42
 
 TEMPORAL_SIGNALS = [
-    "pe_timestamp",         # (1) compilation time — most reliable
-    "certificate_validity", # (2) Authenticode — moderate noise
-    "vt_first_seen",        # (3) VT first-submission — higher noise
-    "code_reuse_order",     # (4) code-reuse ordering — low noise
-    "string_markers",       # (5) compiler version markers — moderate noise
+    "pe_timestamp",         # (1) compilation time - most reliable
+    "certificate_validity", # (2) Authenticode - moderate noise
+    "vt_first_seen",        # (3) VT first-submission - higher noise
+    "code_reuse_order",     # (4) code-reuse ordering - low noise
+    "string_markers",       # (5) compiler version markers - moderate noise
 ]
 
 # Per-signal noise parameters (seconds of random jitter added independently).
-# Reflects real-world signal reliability (methodology §4.3):
+# Reflects real-world signal reliability (Section 5.4):
 # - pe_timestamp: usually accurate but spoofable (small noise)
 # - certificate_validity: Authenticode certs are fairly precise
 # - vt_first_seen: VT submission delay is HIGHLY variable (weeks-months)
@@ -52,7 +52,7 @@ TEMPORAL_SIGNALS = [
 SIGNAL_NOISE = {
     "pe_timestamp":         3 * 86400,   # ±3 days (accurate but spoofable)
     "certificate_validity": 21 * 86400,  # ±21 days (Authenticode cert precision)
-    "vt_first_seen":        180 * 86400, # ±180 days (VT submission delay — noisiest)
+    "vt_first_seen":        180 * 86400, # ±180 days (VT submission delay - noisiest)
     "code_reuse_order":     7 * 86400,   # ±7 days (code-reuse analysis is precise)
     "string_markers":       30 * 86400,  # ±30 days (compiler markers approximate)
 }
@@ -139,7 +139,7 @@ def compute_standardized_features(samples: List[Dict]) -> np.ndarray:
 # A8: k-sensitivity sweep (extended grid)
 # ===========================================================================
 def run_a8(samples: List[Dict], log) -> Dict:
-    log("\n--- A8: k-sensitivity sweep (extended grid) ---")
+    log("\n=== A8: k-sensitivity sweep (extended grid) ===")
     n = len(samples)
     features_norm = compute_standardized_features(samples)
     families = [s.get("family", "Unknown") for s in samples]
@@ -224,7 +224,7 @@ def run_a9(samples: List[Dict], log) -> Dict:
     """
     from scipy.stats import kendalltau
 
-    log("\n--- A9: Leave-one-out temporal signal ablation [FIXED: Kendall tau] ---")
+    log("\n=== A9: Leave-one-out temporal signal ablation [Kendall tau] ===")
 
     # Filter to valid timestamps (2000-01-01 to 2025-12-31)
     TS_MIN = 946684800   # 2000-01-01
@@ -299,7 +299,7 @@ def run_a9(samples: List[Dict], log) -> Dict:
             "survives": delta_tau >= 2.0,
         }
         status = "SURVIVES" if delta_tau >= 2.0 else "Below floor"
-        log(f"  Drop {signal}: tau={tau_without:.4f}, Δ={delta_tau:+.2f}% — {status}")
+        log(f"  Drop {signal}: tau={tau_without:.4f}, Δ={delta_tau:+.2f}% - {status}")
 
     n_surviving = sum(1 for v in loo_results.values() if v["survives"])
     log(f"\n  Surviving signals (Δ ≥ 2.0%): {n_surviving}/5")
@@ -331,7 +331,7 @@ def main():
         thresh = yaml.safe_load(f)
 
     log("=" * 60)
-    log("R-ABLATE-K (A8) + R-ABLATE-TEMP-LOO (A9): G4 Ablations [FIXED]")
+    log("R-ABLATE-K (A8) + R-ABLATE-TEMP-LOO (A9): G4 Ablations")
     log("=" * 60)
 
     t0 = time.time()
@@ -369,7 +369,7 @@ def main():
 
     metrics = {
         "run_id": "R-ABLATE-K-A9",
-        "milestone": "G4 ablations: k-sensitivity (A8) + temporal LOO (A9) [FIXED]",
+        "milestone": "G4 ablations: k-sensitivity (A8) + temporal LOO (A9)",
         "gate": "G4",
         "timestamp": time.strftime("%Y-%m-%dT%H:%M:%S"),
         "status": "COMPLETED",

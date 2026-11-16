@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""R-FEAT-CORR: H2 Spearman correlation — MalPhylo interpretable sim vs MalTree embedding distance.
+"""R-FEAT-CORR: H2 Spearman correlation - MalPhylo interpretable sim vs MalTree embedding distance.
 
-Experiment_plan §3 H2 hypothesis: "interpretable features ≈ embeddings" —
+hypothesis specification H2 hypothesis: "interpretable features ≈ embeddings"  - 
 Spearman ρ ≥ ρ_min (0.30) between MalPhylo similarity and MalTree embedding
 similarity on held-out pairs.
 
@@ -10,7 +10,7 @@ MalTree (ML embeddings), of which only 5 are in R-G1 features (10 pairs).
 This is insufficient for a reliable correlation (C(5,2)=10 pairs vs the
 methodology's recommended ≥100 pairs).
 
-Approach (per experiment_plan §3 note: "use MalTree's own samples for the H2
+Approach (per calibration protocol note: "use MalTree's own samples for the H2
 correlation test"):
   1. Extract MalPhylo interpretable features from the 7 overlapping samples
      that have raw PE ZIPs on disk.
@@ -20,10 +20,10 @@ correlation test"):
   5. If n < 20, document as preliminary and recommend a larger overlap study
      for the final paper.
 
-NO ML TRAINING (methodology §0/§3; experiment_plan §0).
+NO ML TRAINING (Sections 3.1-3.5; evaluation protocol).
 
 Outputs:
-  runs/R-FEAT-CORR/{metrics.json, run.log, config.yaml, scatter_data.csv}
+  results/R-FEAT-CORR/{metrics.json, run.log, config.yaml, scatter_data.csv}
 """
 from __future__ import annotations
 
@@ -39,8 +39,8 @@ import numpy as np
 import yaml
 
 HERE = Path(__file__).resolve().parent
-EXP_DIR = HERE.parent
-sys.path.insert(0, str(EXP_DIR / "src"))
+EXP_DIR = HERE.parent.parent
+sys.path.insert(0, str(EXP_DIR))
 sys.setrecursionlimit(50000)
 
 from malphpylo.config import PackingConfig, RunConfig, FeatureGroupConfig, \
@@ -53,12 +53,12 @@ import pyzipper
 import zipfile
 from scipy.stats import spearmanr, kendalltau
 
-OUT_DIR = EXP_DIR / "runs" / "R-FEAT-CORR"
+OUT_DIR = EXP_DIR / "results" / "R-FEAT-CORR"
 EMB_PATH = EXP_DIR / "data" / "maltree" / "embeddings_fused.json"
 MANIFEST_PATH = EXP_DIR / "data" / "malwarebazaar" / "manifest.jsonl"
 SAMPLES_DIR = EXP_DIR / "data" / "malwarebazaar" / "samples"
-RG1_PATH = EXP_DIR / "runs" / "R-G1" / "features.jsonl"
-THRESHOLDS_PATH = EXP_DIR / "config" / "thresholds.yaml"
+RG1_PATH = EXP_DIR / "results" / "R-G1" / "features.jsonl"
+THRESHOLDS_PATH = EXP_DIR / "configs" / "thresholds.yaml"
 
 ZIP_PW = b"infected"
 
@@ -349,14 +349,14 @@ def run() -> Dict:
             "scatter_data_csv": str(OUT_DIR / "scatter_data.csv"),
         },
         "limitations": [
-            f"Only {n_paired} paired samples ({n_pairs} pairs) — far below the recommended ≥100 pairs for a reliable correlation",
+            f"Only {n_paired} paired samples ({n_pairs} pairs) - far below the recommended ≥100 pairs for a reliable correlation",
             f"Cross-corpus overlap is only 28 SHA256s between MalwareBazaar ({len(mb_entries)}) and MalTree ({len(sha_list)}), of which {n_paired} have MalPhylo features available",
             "If ρ is insignificant, this may be due to small sample size rather than a true lack of correlation",
             "Recommendation for the paper: acquire a larger overlapping corpus or run a same-corpus H2 test on MalTree's own raw samples (if available)",
         ],
         "interpretation": (
             f"Spearman ρ={rho:.4f} (p={p_value:.4f}) on {n_pairs} pairs. "
-            f"{'PASS: ρ ≥ ρ_min (0.30) — interpretable features correlate with ML embeddings.' if passes_rho else 'FAIL: ρ < ρ_min (0.30) — correlation insufficient; may be due to small sample size.'}"
+            f"{'PASS: ρ ≥ ρ_min (0.30) - interpretable features correlate with ML embeddings.' if passes_rho else 'FAIL: ρ < ρ_min (0.30) - correlation insufficient; may be due to small sample size.'}"
         ),
     }
 

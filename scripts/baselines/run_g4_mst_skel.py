@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
-"""R-MST-SKEL: Skeleton — MST vertical skeleton structure quality vs B4 (MST-only).
+"""R-MST-SKEL: Skeleton - MST vertical skeleton structure quality vs B4 (MST-only).
 
-Experiment_plan §4: "MST vertical skeleton | B4 (MST-only) | structure quality".
+evaluation design: "MST vertical skeleton | B4 (MST-only) | structure quality".
 
-Tests whether the MST skeleton (§4.1 step 2) correctly captures vertical
+Tests whether the MST skeleton (Section 3.4 step 2) correctly captures vertical
 inheritance: same-family nodes should cluster in the MST, with cross-family
 edges appearing only in the typed augmentation layer.
 
 B4 = MST-only (no typed edges, no augmentation). MalPhylo = MST + typed augment.
 Metric: family purity of MST edges (same-family fraction), tree structure quality.
 
-Outputs: runs/R-MST-SKEL/{metrics.json, run.log, config.yaml}
+Outputs: results/R-MST-SKEL/{metrics.json, run.log, config.yaml}
 """
 from __future__ import annotations
 
@@ -22,13 +22,13 @@ import numpy as np
 import yaml
 
 HERE = Path(__file__).resolve().parent
-EXP_DIR = HERE.parent
-sys.path.insert(0, str(EXP_DIR / "src"))
+EXP_DIR = HERE.parent.parent
+sys.path.insert(0, str(EXP_DIR))
 
-RG1_PATH = EXP_DIR / "runs" / "R-G1" / "features.jsonl"
-CROSSFAM_PATH = EXP_DIR / "runs" / "R-CROSSFAM" / "metrics.json"
-THRESH_PATH = EXP_DIR / "config" / "thresholds.yaml"
-OUT_DIR = EXP_DIR / "runs" / "R-MST-SKEL"
+RG1_PATH = EXP_DIR / "results" / "R-G1" / "features.jsonl"
+CROSSFAM_PATH = EXP_DIR / "results" / "R-CROSSFAM-HONEST" / "metrics.json"
+THRESH_PATH = EXP_DIR / "configs" / "thresholds.yaml"
+OUT_DIR = EXP_DIR / "results" / "R-MST-SKEL"
 
 MAX_SAMPLES = 500  # subset for tractable O(n^2) MST
 
@@ -49,23 +49,34 @@ def load_features(path: str, limit: int) -> List[Dict]:
 
 
 def extract_feature_vector(d: Dict) -> np.ndarray:
-    """Extract a numeric feature vector from R-G1 features."""
+    """Extract a numeric feature vector from R-G1 features (nested feature_groups or flat)."""
+    fg = d.get("feature_groups", d)
     vec = []
-    # Byte histogram (256 bins)
-    bh = d.get("byte_histogram", {})
-    for i in range(256):
-        vec.append(float(bh.get(str(i), bh.get(i, 0.0))))
-    # Entropy histogram
-    eh = d.get("entropy_histogram", [])
-    vec.extend(float(x) for x in eh)
-    # Opcode ngrams (top 20)
-    on = d.get("opcode_ngrams", {})
-    for k in sorted(on.keys())[:20]:
-        vec.append(float(on[k]))
-    # Section count, imports count
-    vec.append(float(d.get("n_sections", 0)))
-    vec.append(float(d.get("n_imports", 0)))
-    vec.append(float(d.get("n_strings", 0)))
+    # Byte histogram (256 bins) + entropy histogram (16 bins)
+    bh_obj = fg.get("byte_histogram", {})
+    if isinstance(bh_obj, dict) and "byte_hist" in bh_obj:
+        vec.extend(float(x) for x in bh_obj.get("byte_hist", [])[:256])
+        while len(vec) < 256:
+            vec.append(0.0)
+        vec.extend(float(x) for x in bh_obj.get("entropy_hist", [])[:16])
+        while len(vec) < 272:
+            vec.append(0.0)
+    else:
+        for i in range(256):
+            vec.append(float(bh_obj.get(str(i), bh_obj.get(i, 0.0))))
+        eh = fg.get("entropy_histogram", d.get("entropy_histogram", []))
+        vec.extend(float(x) for x in eh[:16])
+    # String entropy distribution (16 bins) + section/import/rare-string counts
+    se_obj = fg.get("string_entropy", {})
+    if isinstance(se_obj, dict) and "entropy_distribution" in se_obj:
+        vec.extend(float(x) for x in se_obj.get("entropy_distribution", [])[:16])
+        vec.append(float(len(se_obj.get("rare_strings", []))))
+    else:
+        vec.append(float(d.get("n_strings", 0)))
+    sec_obj = fg.get("section_metadata", {})
+    imp_obj = fg.get("imports", {})
+    vec.append(float(len(sec_obj.get("sections", [])) if isinstance(sec_obj, dict) else d.get("n_sections", 0)))
+    vec.append(float(imp_obj.get("n_symbols", len(imp_obj.get("symbol_set", []))) if isinstance(imp_obj, dict) else d.get("n_imports", 0)))
     return np.array(vec, dtype=float)
 
 
@@ -185,20 +196,21 @@ def main():
 
     # B4 comparison: B4 is MST-only (same skeleton, no typed edges)
     # The typed DAG (MalPhylo) adds augmentation edges on top of the MST.
-    # From R-CROSSFAM: MST=2073, augment=743612 for 2074 samples
+    # Compare against density-matched R-CROSSFAM-HONEST operating point
     with open(CROSSFAM_PATH) as f:
         crossfam = json.load(f)
-    dag_info = crossfam.get("malphpylo_dag", {})
-    full_mst_edges = dag_info.get("mst_edges", 2073)
-    full_augment_edges = dag_info.get("augment_edges", 743612)
-    full_total = dag_info.get("total_edges", 745685)
+    dm = crossfam.get("density_matched_results", {})
+    to = crossfam.get("theta_optimization", {})
+    full_mst_edges = dm.get("malphpylo_mst_edges", 2073)
+    full_augment_edges = dm.get("malphpylo_augment_edges_kept", 8297)
+    full_total = to.get("best_total_edges", full_mst_edges + full_augment_edges)
     full_n = crossfam.get("corpus", {}).get("n_samples", 2074)
 
-    # Cross-family fraction in full DAG
-    malphpylo_cf = crossfam.get("malphpylo_dag", {}).get("cf_fraction", 0.998)
-    b1_cf = crossfam.get("baselines", {}).get("B1_NJ", {}).get("cf_stats", {}).get("cross_family_fraction", 0.161)
+    # Cross-family fraction at sparse operating point
+    malphpylo_cf = dm.get("malphpylo_cf_fraction", 0.8606)
+    b1_cf = 0.161  # historical B1 neighbor-joining cross-family fraction reference
 
-    log(f"\nFull DAG (R-CROSSFAM): {full_n} samples")
+    log(f"\nFull DAG (R-CROSSFAM-HONEST): {full_n} samples")
     log(f"  MST edges: {full_mst_edges}, Augment: {full_augment_edges}, Total: {full_total}")
     log(f"  MalPhylo cf_fraction: {malphpylo_cf}")
     log(f"  B1 NJ cf_fraction: {b1_cf}")
@@ -215,7 +227,7 @@ def main():
     # Verdict: MST skeleton validity = connected + typed augmentation adds value.
     # Note: byte-level MST family purity is naturally LOW on packed malware
     # (packed samples share byte patterns regardless of family). This low purity
-    # is precisely why typed edges are needed — the MST alone (B4) cannot
+    # is precisely why typed edges are needed - the MST alone (B4) cannot
     # distinguish vertical from horizontal edges. The MST's job is to provide a
     # valid connected backbone; typed augmentation adds the semantic layer.
     with open(THRESH_PATH) as f:

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Targeted download: fetch raw PE for families with <100 samples on disk.
 
-Resolves StatisticalAnalyst BLOCK 2: family coverage gap (3 → 12+ families).
+Targeted sample fetcher to meet per-family corpus coverage (>=100/family).
 
 Strategy: for each family in the manifest with ≥100 entries but <100 raw PE
 ZIPs on disk, download up to `per_family` samples (default 120, to allow for
@@ -21,7 +21,7 @@ from collections import Counter, defaultdict
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-EXP_DIR = HERE.parent
+EXP_DIR = HERE.parent.parent
 DATA_DIR = EXP_DIR / "data" / "malwarebazaar"
 SAMPLES_DIR = DATA_DIR / "samples"
 MANIFEST = DATA_DIR / "manifest.jsonl"
@@ -50,7 +50,14 @@ def main():
     key = load_env()
     print(f"Auth-Key loaded (len={len(key)})")
 
-    # Build family → list of sha256 from manifest
+    if not MANIFEST.exists():
+        sys.exit(
+            f"ERROR: {MANIFEST} not found. Run scripts/data_acquisition/fetch_malwarebazaar.py first "
+            "to initialize the local MalwareBazaar manifest and sample store."
+        )
+    SAMPLES_DIR.mkdir(parents=True, exist_ok=True)
+
+    # Build family -> list of sha256 from manifest
     manifest_by_fam: dict[str, list[str]] = defaultdict(list)
     with open(MANIFEST) as f:
         for line in f:
@@ -88,7 +95,7 @@ def main():
     print(f"Estimated time: {total_to_download * 0.3 / 60:.1f} minutes")
 
     if total_to_download == 0:
-        print("Nothing to download — all families already have ≥100 samples.")
+        print("Nothing to download - all families already have ≥100 samples.")
         return
 
     # Download

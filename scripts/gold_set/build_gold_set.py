@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 """C2/H3: Edge-type gold-set construction from MASCOT genealogy.
 
-Builds the two-tier provenance-anchored edge-type gold set per methodology §4.2.1:
+Builds the two-tier provenance-anchored edge-type gold set per Section 3.5.1:
   - Tier-G (provenance-anchored, PRIMARY truth): ≥150 edges, ≥2 provenance sources
   - Tier-S (annotator-agreement, LABELABILITY): ≥350 edges, κ_agree ≥ 0.6
 
-Edge types (methodology §4.2 λ-decide taxonomy):
-  1. parent-child    — vertical inheritance (derivative/fork)
-  2. code-borrow     — horizontal code transfer (cross-family code reuse)
-  3. toolkit-share   — shared builder/packer toolkit
-  4. convergent      — similar behavior, independent development
+Edge types (Section 3.5 λ-decide taxonomy):
+  1. parent-child    - vertical inheritance (derivative/fork)
+  2. code-borrow     - horizontal code transfer (cross-family code reuse)
+  3. toolkit-share   - shared builder/packer toolkit
+  4. convergent      - similar behavior, independent development
 
 Provenance sources for Tier-G:
   (P1) MASCOT genealogy: same family + temporal ordering (date) → parent-child
@@ -20,7 +20,7 @@ Provenance sources for Tier-G:
 Safety: static metadata only. No malware execution. No source code execution.
 
 Usage:
-  python3 scripts/build_gold_set.py [--output runs/R-EDGETYPE-GOLD]
+  python3 scripts/gold_set/build_gold_set.py
 """
 from __future__ import annotations
 
@@ -35,9 +35,9 @@ from typing import Any, Dict, List, Optional, Set, Tuple
 import openpyxl
 
 HERE = Path(__file__).resolve().parent
-EXP_DIR = HERE.parent
+EXP_DIR = HERE.parent.parent
 MASCOT_DIR = EXP_DIR / "data" / "mascot-meta"
-OUT_DIR = EXP_DIR / "runs" / "R-EDGETYPE-GOLD"
+OUT_DIR = EXP_DIR / "results" / "R-EDGETYPE-GOLD"
 
 # Edge type constants
 ET_PARENT_CHILD = "parent-child"
@@ -207,7 +207,7 @@ def build_edges(specimens: List[Dict]) -> Tuple[List[Dict], List[Dict]]:
             "tier": tier,
         }
 
-    # --- Tier-G: parent-child (same family, temporal ordering) ---
+    # === Tier-G: parent-child (same family, temporal ordering) ===
     for fam, specs in by_family.items():
         if len(specs) < 2:
             continue
@@ -229,7 +229,7 @@ def build_edges(specimens: List[Dict]) -> Tuple[List[Dict], List[Dict]]:
                 }
                 tier_g_edges.append(make_edge(src, dst, ET_PARENT_CHILD, provenance, evidence, "G"))
 
-    # --- Tier-G: code-borrow (different family, same language, shared class/behavior) ---
+    # === Tier-G: code-borrow (different family, same language, shared class/behavior) ===
     families_list = list(by_family.keys())
     for fi in range(len(families_list)):
         for fj in range(fi + 1, len(families_list)):
@@ -260,7 +260,7 @@ def build_edges(specimens: List[Dict]) -> Tuple[List[Dict], List[Dict]]:
                     }
                     tier_g_edges.append(make_edge(sa, sb, ET_CODE_BORROW, provenance, evidence, "G"))
 
-    # --- Tier-G: toolkit-share (different family, same packer) ---
+    # === Tier-G: toolkit-share (different family, same packer) ===
     packer_groups: Dict[str, List[Dict]] = defaultdict(list)
     for sp in specimens:
         pack = sp.get("pack", "")
@@ -290,7 +290,7 @@ def build_edges(specimens: List[Dict]) -> Tuple[List[Dict], List[Dict]]:
                 }
                 tier_g_edges.append(make_edge(sa, sb, ET_TOOLKIT_SHARE, provenance, evidence, "G"))
 
-    # --- Tier-G: convergent (different family, same behavior, different language) ---
+    # === Tier-G: convergent (different family, same behavior, different language) ===
     for fi in range(len(families_list)):
         for fj in range(fi + 1, min(len(families_list), fi + 20)):
             fam_a, fam_b = families_list[fi], families_list[fj]
@@ -314,7 +314,7 @@ def build_edges(specimens: List[Dict]) -> Tuple[List[Dict], List[Dict]]:
                     }
                     tier_g_edges.append(make_edge(sa, sb, ET_CONVERGENT, provenance, evidence, "G"))
 
-    # --- Tier-S: annotator-agreement candidates (same keyword, within-language pairs) ---
+    # === Tier-S: annotator-agreement candidates (same keyword, within-language pairs) ===
     for kw, specs in by_keyword.items():
         if len(specs) < 2:
             continue

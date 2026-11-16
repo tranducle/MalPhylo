@@ -1,18 +1,18 @@
-"""Phylogenetic DAG construction (§4.1) — the core C1 algorithm.
+"""Phylogenetic DAG construction (Section 3.4) - the core C1 algorithm.
 
 Input:  sample set S, similarity sim, temporal labels tau.
 Output: typed DAG G = (V, E, tau, w, lambda).
 
-Steps (§4.1):
+Steps (Section 3.4):
   1. Build complete weighted similarity graph on V_L (pruned to top-k).
   2. Compute MAXIMUM spanning tree (sim is a proximity) as vertical skeleton;
      orient each edge temporally; label 'parent-child'.
-  3. Identify cross-family candidate edges per §4.2 admission predicate.
+  3. Identify cross-family candidate edges per Section 3.5 admission predicate.
   4. Add each candidate as an extra DAG edge; classify lambda via λ-decide.
-  5. Insert inferred internal nodes V_I only to resolve polytomies / borrow
-     junctions, per §2.1.1 (children-hash key, median phi, tau=min-child-eps).
+  5. Insert inferred internal nodes V_I to resolve MST skeleton polytomies
+     per Section 3.1 (children-hash key, features=None, tau=min-child-eps).
   6. Verify the orientation invariant kappa(u) < kappa(v) via Kahn's algorithm.
-     By §2.4 no cycle can exist; any violation => edge-admission bug (halt).
+     By Section 3.2 no cycle can exist; any violation => edge-admission bug (halt).
 """
 from __future__ import annotations
 
@@ -31,7 +31,7 @@ from .edge_typing import (
 from .features import SampleFeatures
 from .similarity import BOTTOM, SimilarityResult, pairwise_similarity
 from .temporal import (
-    KappaKey, TAU_BOT, build_kappa, compute_tau, internal_tau, kappa_orientation,
+    KappaKey, TAU_BOT, _TauBot, build_kappa, compute_tau, internal_tau, kappa_orientation,
 )
 
 
@@ -44,12 +44,12 @@ class VertexState:
     kappa: KappaKey
     tau: object                           # float | _TauBot
     family: Optional[str] = None
-    child_hashes: Optional[List[str]] = None  # for V_I (§2.1.1)
+    child_hashes: Optional[List[str]] = None  # for V_I (Section 3.1)
 
 
 @dataclass
 class EdgeState:
-    """Per-edge state with auditable evidence chain (§4.4)."""
+    """Per-edge state with auditable evidence chain (Section 3.6)."""
     u: str
     v: str
     label: str           # in Lambda
@@ -61,12 +61,12 @@ class EdgeState:
 
 @dataclass
 class DAGConstructionResult:
-    """Output of construct_dag (§4.1)."""
+    """Output of construct_dag (Section 3.4)."""
     graph: nx.DiGraph
     vertices: Dict[str, VertexState]
     edges: List[EdgeState]
     rejected: List[Dict]          # logged for evidence ledger
-    bottom_pairs: int             # sim=⊥ count (§3.3 iv)
+    bottom_pairs: int             # sim=⊥ count (Section 3.3 iv)
     acyclicity_verified: bool
     n_internal_inserted: int
     n_mst_edges: int
@@ -75,7 +75,7 @@ class DAGConstructionResult:
 
 def _build_similarity_graph(samples: List[SampleFeatures],
                             cfg: RunConfig) -> Dict[Tuple[str, str], SimilarityResult]:
-    """§4.1 step 1: complete weighted similarity graph on V_L (top-k pruned)."""
+    """Section 3.4 step 1: complete weighted similarity graph on V_L (top-k pruned)."""
     n = len(samples)
     results: Dict[Tuple[str, str], SimilarityResult] = {}
     k = cfg.mst.top_k_neighbors
@@ -99,8 +99,8 @@ def _build_similarity_graph(samples: List[SampleFeatures],
 
 def construct_dag(samples: List[SampleFeatures],
                   cfg: RunConfig) -> DAGConstructionResult:
-    """Full §4.1 DAG construction pipeline. No ML training."""
-    # ---- compute temporal labels + kappa keys (§2.4 + §4.3) ----
+    """Full Section 3.4 DAG construction pipeline. No ML training."""
+    # === compute temporal labels + kappa keys (Section 3.2 + Section 5.4) ===
     vertices: Dict[str, VertexState] = {}
     for s in samples:
         tau, used, conflicts = compute_tau(s.temporal_signals)
@@ -110,11 +110,11 @@ def construct_dag(samples: List[SampleFeatures],
             kappa=kappa, tau=tau, family=s.family,
         )
 
-    # ---- §4.1 step 1: similarity graph (top-k pruned) ----
+    # === Section 3.4 step 1: similarity graph (top-k pruned) ===
     sim_graph = _build_similarity_graph(samples, cfg)
     bottom_pairs = sum(1 for r in sim_graph.values() if r.value is BOTTOM)
 
-    # ---- §4.1 step 2: MAXIMUM spanning tree skeleton ----
+    # === Section 3.4 step 2: MAXIMUM spanning tree skeleton ===
     # networkx works with weights; use -sim for minimum-spanning-tree => maximum sim.
     ug = nx.Graph()
     for s in samples:
@@ -143,7 +143,7 @@ def construct_dag(samples: List[SampleFeatures],
 
     mst = nx.maximum_spanning_tree(ug, weight="weight")
 
-    # ---- build directed skeleton, oriented by kappa (§2.4 rule 3) ----
+    # === build directed skeleton, oriented by kappa (Section 3.2 rule 3) ===
     dag = nx.DiGraph()
     for vid in vertices:
         dag.add_node(vid)
@@ -155,12 +155,12 @@ def construct_dag(samples: List[SampleFeatures],
         res = sim_graph.get((a_id, b_id)) or sim_graph.get((b_id, a_id))
         if res is None or res.value is None:
             continue
-        # orient temporally-earlier -> later (§2.3, §2.4 rule 3)
+        # orient temporally-earlier -> later (Section 3.2, Section 3.2 rule 3)
         if ka < kb:
             u, v, ku, kv = a_id, b_id, ka, kb
         else:
             u, v, ku, kv = b_id, a_id, kb, ka
-        # MST skeleton edges are parent-child (§4.1 step 2)
+        # MST skeleton edges are parent-child (Section 3.4 step 2)
         edges.append(EdgeState(
             u=u, v=v, label=PARENT_CHILD, weight=res.value,
             confidence=res.value, rule_fired=4,
@@ -170,7 +170,7 @@ def construct_dag(samples: List[SampleFeatures],
 
     n_mst_edges = dag.number_of_edges()
 
-    # ---- §4.1 step 3-4: augment with cross-family candidates ----
+    # === Section 3.4 step 3-4: augment with cross-family candidates ===
     seen_pairs: Set[frozenset] = set()
     for a in mst.edges():
         seen_pairs.add(frozenset(a))
@@ -200,26 +200,25 @@ def construct_dag(samples: List[SampleFeatures],
                 continue
             if not is_cross_family_candidate(a, b, dec):
                 continue
-            # §4.2 rule 1 convergent is a relabeling only; skip ancestry edges
+            # Section 3.5 rule 1 convergent is a relabeling only; skip ancestry edges
             if dec.label == CONVERGENT:
                 rejected.append({
                     "pair": [a.sample_id, b.sample_id],
                     "reason": "convergent_relabel_only", "r_bar": dec.r_bar,
                 })
                 continue
-            # orient by kappa (§2.4 rule 6)
-            if kappa_orientation(ka, kb):
-                u, v = a.sample_id, b.sample_id
-            elif kappa_orientation(kb, ka):
-                u, v = b.sample_id, a.sample_id
-            else:
-                # neither orders (both TAU_BOT) -> forced convergent (§2.4 rule 5)
+            # orient by kappa (Section 3.2): both TAU_BOT forces convergent
+            if isinstance(ka.tau, _TauBot) and isinstance(kb.tau, _TauBot):
                 rejected.append({
                     "pair": [a.sample_id, b.sample_id],
                     "reason": "both_TAU_BOT_forced_convergent", "r_bar": dec.r_bar,
                 })
                 continue
-            # augmentation invariant (§2.4 rule 6): admit only if kappa(u)<kappa(v)
+            if kappa_orientation(ka, kb):
+                u, v = a.sample_id, b.sample_id
+            else:
+                u, v = b.sample_id, a.sample_id
+            # augmentation invariant (Section 3.2 rule 6): admit only if kappa(u)<kappa(v)
             if not kappa_orientation(vertices[u].kappa, vertices[v].kappa):
                 rejected.append({
                     "pair": [a.sample_id, b.sample_id],
@@ -239,31 +238,63 @@ def construct_dag(samples: List[SampleFeatures],
 
     n_augment_edges = dag.number_of_edges() - n_mst_edges
 
-    # ---- §4.1 step 5: insert V_I nodes for polytomies (>=3 MST children) ----
+    # === Section 3.4 step 5: resolve MST polytomies (>=3 skeleton children) via V_I ===
     n_internal = 0
-    # find nodes with >=3 outgoing parent-child edges
-    polytomy_parents = [n for n in dag.nodes()
-                        if dag.out_degree(n) >= 3 and not vertices[n].is_internal]
-    for parent in list(polytomy_parents):
-        children = list(dag.successors(parent))
-        child_hashes = [vertices[c].features.sha256 for c in children
+    edge_lookup = {(e.u, e.v): i for i, e in enumerate(edges)}
+    polytomy_parents = [n for n in list(dag.nodes()) if not vertices[n].is_internal]
+    for parent in polytomy_parents:
+        skel_children = [
+            c for c in list(dag.successors(parent))
+            if (parent, c) in edge_lookup and edges[edge_lookup[(parent, c)]].evidence.get("mst_skeleton")
+        ]
+        if len(skel_children) < 3:
+            continue
+        child_hashes = [vertices[c].features.sha256 for c in skel_children
                         if vertices[c].features is not None]
         if not child_hashes:
             continue
-        child_taus = [vertices[c].tau for c in children]
+        child_taus = [vertices[c].tau for c in skel_children]
         tau_vi = internal_tau(child_taus, cfg.temporal.epsilon_seconds)
-        # §2.1.1: V_I node = median phi of children, children-hash key
+        if isinstance(tau_vi, _TauBot):
+            continue
         vi_id = f"INT_{parent}_{n_internal}"
         kappa_vi = build_kappa(vi_id, None, tau_vi, child_hashes=child_hashes)
+        if not kappa_orientation(vertices[parent].kappa, kappa_vi):
+            continue
+        if not all(kappa_orientation(kappa_vi, vertices[c].kappa) for c in skel_children):
+            continue
+
         vertices[vi_id] = VertexState(
             vid=vi_id, is_internal=True, features=None,
             kappa=kappa_vi, tau=tau_vi, child_hashes=child_hashes,
         )
         dag.add_node(vi_id)
+        old_weights = []
+        drop_indices = set()
+        for c in skel_children:
+            idx = edge_lookup[(parent, c)]
+            old_weights.append(edges[idx].weight)
+            drop_indices.add(idx)
+            dag.remove_edge(parent, c)
+        edges = [e for i, e in enumerate(edges) if i not in drop_indices]
+
+        mean_w = sum(old_weights) / len(old_weights)
+        dag.add_edge(parent, vi_id)
+        edges.append(EdgeState(
+            u=parent, v=vi_id, label=PARENT_CHILD, weight=mean_w, confidence=mean_w,
+            rule_fired=4, evidence={"internal_junction": True},
+        ))
+        for c, w_c in zip(skel_children, old_weights):
+            dag.add_edge(vi_id, c)
+            edges.append(EdgeState(
+                u=vi_id, v=c, label=PARENT_CHILD, weight=w_c, confidence=w_c,
+                rule_fired=4, evidence={"internal_junction": True, "mst_skeleton": True},
+            ))
+        edge_lookup = {(e.u, e.v): i for i, e in enumerate(edges)}
         n_internal += 1
 
-    # ---- §4.1 step 6: verify acyclicity via Kahn's algorithm ----
-    # By §2.4 no cycle can exist; violation => edge-admission bug (halt).
+    # === Section 3.4 step 6: verify acyclicity via Kahn's algorithm ===
+    # By Section 3.2 no cycle can exist; violation => edge-admission bug (halt).
     acyclic = _verify_acyclic_kahn(dag)
 
     return DAGConstructionResult(
@@ -275,8 +306,8 @@ def construct_dag(samples: List[SampleFeatures],
 
 
 def _verify_acyclic_kahn(dag: nx.DiGraph) -> bool:
-    """Kahn's algorithm (§4.1 step 6). Detects implementation bugs only —
-    by §2.4 no data-induced cycle can exist."""
+    """Kahn's algorithm (Section 3.4 step 6). Detects implementation bugs only  - 
+    by Section 3.2 no data-induced cycle can exist."""
     indeg = {n: 0 for n in dag.nodes()}
     for _, v in dag.edges():
         indeg[v] = indeg.get(v, 0) + 1

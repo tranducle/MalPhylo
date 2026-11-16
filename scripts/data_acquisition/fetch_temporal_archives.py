@@ -24,7 +24,7 @@ from pathlib import Path
 import urllib.request
 
 HERE = Path(__file__).resolve().parent
-EXP_DIR = HERE.parent
+EXP_DIR = HERE.parent.parent
 DATA_DIR = EXP_DIR / "data" / "malwarebazaar"
 SAMPLES_DIR = DATA_DIR / "samples"
 ARCHIVE_DIR = DATA_DIR / "archives"
@@ -121,8 +121,8 @@ def extract_win32_pe(zip_path: Path, seen: set[str], day_str: str,
                 if out.exists():
                     seen.add(sha)
                     continue
-                # store: if raw PE, wrap in a zip with pw "infected" for consistency;
-                # if inner zip, store as-is
+                # Store extracted PE payload inside a local standard ZIP container
+                # (run_g1_features handles both standard ZIPs and AES/encrypted ZIPs)
                 if lower.endswith(".zip"):
                     out.write_bytes(raw_pe if raw_pe else zf.read(name))
                 else:
@@ -188,7 +188,7 @@ def main():
         print(f"[{i+1}/{len(days)}] {day}...", end=" ", flush=True)
         zp = download_day(day)
         if zp is None:
-            print("404 / missing — skip")
+            print("404 / missing - skip")
             continue
         n_pe, n_new = extract_win32_pe(zp, seen, day.isoformat(), args.max_per_day)
         total_pe += n_pe

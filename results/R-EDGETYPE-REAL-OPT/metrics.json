@@ -1,7 +1,7 @@
 {
   "run_id": "R-EDGETYPE-REAL-OPT",
   "gate": "G3",
-  "milestone": "C2 threshold optimization (D2 fix)",
+  "milestone": "C2 threshold optimization",
   "timestamp": "2026-06-29T10:33:51",
   "status": "COMPLETED",
   "baseline_v3": {
@@ -48,6 +48,6 @@
     "F_min": 0.2615,
     "rb_C2_floor": 0.3
   },
-  "reconciliation_note": "This run OPTIMIZES the honest real-PE C2 metric (D2). The tautological R-EDGETYPE (F1=1.0) is NOT reported as C2; it is retained only as a rule-taxonomy consistency diagnostic.",
+  "reconciliation_note": "This run OPTIMIZES the honest real-PE C2 metric. The tautological R-EDGETYPE (F1=1.0) is NOT reported as C2; it is retained only as a rule-taxonomy consistency diagnostic.",
   "timing_seconds": 1.6
 }
