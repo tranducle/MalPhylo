@@ -14,7 +14,7 @@ Key dependencies: `networkx`, `scipy`, `numpy`, `scikit-learn` (evaluation metri
 
 ## Offline Verification (No External Data Required)
 
-1. Formal-property and core-invariant unit tests (`24` tests in `tests/test_formal_properties.py` extending the submission's `14`-test formal baseline):
+1. Formal-property and core-invariant unit tests (`24/24` tests in `tests/test_formal_properties.py`):
 
 ```bash
 python -m pytest tests/ -v

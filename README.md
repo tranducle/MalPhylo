@@ -17,7 +17,7 @@ Values below summarize the current manuscript evaluation alongside the archived 
 | **C2** Refinement upper estimate | Post-hoc rule refinement (non-headline upper estimate) | `0.647 +/- 0.015` (`rb = 0.413`) | Threshold-opt snapshot: `0.5516` (`results/R-EDGETYPE-REAL-OPT/`) |
 | **Training-free (`B8`)** | Top-`32` cross-family neighbor rate vs same-corpus PCA proxy (`2,074` PE samples) | `0.455` vs `0.468`, **`Delta = -0.012`** | Non-inferior within `delta_eq = 0.10` (`results/R-DAG-MLFEAT-SAME-v2/`) |
 | **C3** Temporal alignment | Within-family triplet inconsistency (`3,002` PE corpus) | `0.21` (`string_markers`) vs `0.30` quality-weighted (honest negative) | `0.39` uniform median; `0.43` `first_seen` |
-| **C4** Scalability & tests | HNSW `recall@32` / latency (`3,002` PE) + regression suite | **`0.957 @ 0.06 ms/query`** (`0.13 s` build); **`24` unit tests** (vs `14`-test paper baseline) | `>= 0.95` floor (`2,000`-sample snapshot `0.9632` in `results/R-ANN/`) |
+| **C4** Scalability & tests | HNSW `recall@32` / latency (`3,002` PE) + regression suite | **`0.957 @ 0.06 ms/query`** (`0.13 s` build); **`24/24` unit tests** | `>= 0.95` floor (`2,000`-sample snapshot `0.9632` in `results/R-ANN/`) |
 
 **Key scope boundaries reported in the paper:**
 
